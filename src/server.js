@@ -1,8 +1,14 @@
 const express = require('express')
 const app = express()
 const path = require('path')
-const port = 3000 //
+require('dotenv').config()
 
+// Const
+const port = process.env.PORT || 3001
+const hostname = process.env.HOST_NAME || 'localhost' // 127.0.0.1
+
+// Info list
+console.log(`Server running on computer: ${process.env.COMPUTERNAME} at ${hostname}`)
 // Config view engine ejs
 app.set('view engine', 'ejs')
 // Set views folder/directory
@@ -29,6 +35,6 @@ app.get('/user', (req, res) => {
 })
 
 
-app.listen(port, () => {
-  console.log(`App is listening on port ${port}...`)
+app.listen(port, hostname, () => {
+  console.log(`App is listening on ${hostname} on port ${port}...`)
 })
