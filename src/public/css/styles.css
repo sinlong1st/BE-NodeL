@@ -1,0 +1,52 @@
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f9f9f9;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    background-image: url('/images/bg1.jpg');
+}
+header {
+    background-color: #001f3f; /* Navy blue */
+    padding: 20px;
+    text-align: center;
+    font-size: 2rem;
+    font-family: 'Inter', cursive;
+    color: #fff;
+}
+main {
+    padding: 20px;
+    text-align: center;
+}
+.card {
+    background: #fff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 600px;
+}
+footer {
+    text-align: center;
+    background: #001f3f; /* Navy blue */
+    color: white;
+    padding: 10px 0;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+.button {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+    background: #003366; /* Darker navy blue */
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: background 0.3s;
+}
+.button:hover {
+    background: #002244; /* Even darker navy blue */
+}

@@ -14,20 +14,27 @@ app.set('view engine', 'ejs')
 // Set views folder/directory
 app.set('views', path.join(__dirname,'views'))
 
+// Config static files
+app.use(express.static(path.join(__dirname,'public')))
+
 app.get('/', (req, res) => {
   res.send('Welcome administrator!')
 })
 
-app.get('/about', (req, res) => {
+app.get('/home', (req, res) => {
   res.render('sample.ejs', {
     pageTitle: 'Welcome to My Financial App',
     headerTitle: 'Dashboard',
-    cardTitle: 'Dynamic Item',
+    cardTitle: 'Expenses',
     cardContent: 'Learn how to use the My Financial App to manage your finances. This app is designed to help you track your income and expenses, set financial goals, and create a budget that works for you. Get started today!',
     buttonText: 'Learn More',
     buttonLink: '/learn-more',
     author: 'Admin'
 });
+})
+
+app.get('/learn-more', (req, res) => {
+
 })
 
 app.get('/user', (req, res) => {
