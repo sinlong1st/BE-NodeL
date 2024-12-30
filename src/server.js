@@ -1,8 +1,8 @@
 const express = require('express')
-const path = require('path')
-const mysql = require('mysql2');
 const configViewEngine = require('./config/viewEngine')
+const connection = require('./config/database')
 const webRoutes = require('./routes/web')
+const e = require('express')
 require('dotenv').config()
 const app = express()
 
@@ -22,22 +22,10 @@ app.use('/', webRoutes)
 
 // Test DB connection
 // Create the connection to database
-const connection = mysql.createConnection({
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT, 
-  user: process.env.DB_USER, 
-  password: process.env.DB_PWD,
-  database: process.env.DB_NAME,
-});
-console.log(connection)
-
-// A simple SELECT query
-connection.query(
-  'SELECT * FROM `Users`',
-  function (err, results, fields) {
-    console.log(results); // results contains rows returned by server
-  }
-);
+connection.query('SELECT * from Users', function (error, results) {
+  if (error) throw error
+  console.log('The solution is: ', results)
+})
 
 
 app.listen(port, hostname, () => {
