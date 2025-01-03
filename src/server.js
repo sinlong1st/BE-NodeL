@@ -22,10 +22,10 @@ app.use('/', webRoutes)
 
 // Test DB connection
 // Create the connection to database
-connection.query('SELECT * from Users', function (error, results) {
-  if (error) throw error
-  console.log('The solution is: ', results)
-})
+// connection.query('SELECT * from Users', function (error, results) {
+//   if (error) throw error
+//   console.log('The solution is: ', results)
+// })
 
 
 app.listen(port, hostname, () => {

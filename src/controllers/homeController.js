@@ -1,13 +1,22 @@
+const connection = require('../config/database')
+
 const getHomePage = (req, res) => {
-    res.render('sample.ejs', {
-        pageTitle: 'Welcome to My Financial App',
-        headerTitle: 'Dashboard',
-        cardTitle: 'Expenses',
-        cardContent: 'Learn how to use the My Financial App to manage your finances. This app is designed to help you track your income and expenses, set financial goals, and create a budget that works for you. Get started today!',
-        buttonText: 'Learn More',
-        buttonLink: '/learn-more',
-        author: 'Admin'
-    });
+    users = []
+    connection.query('SELECT * from Users', function (error, results) {
+        if (error) throw error
+        users = results
+        console.log('The solution is: ', results)
+        res.render('sample.ejs', {
+            pageTitle: 'Welcome to My Financial App',
+            headerTitle: 'Dashboard',
+            cardTitle: 'Register',
+            cardContent: 'Register today for free! Get started today!',
+            buttonText: 'Learn More',
+            buttonLink: '/learn-more',
+            author: 'Admin',
+            users: users // Pass the users array to the template
+        });
+    })
 }
 
 const getLearnMorePage = (req, res) => {
