@@ -5,7 +5,7 @@ const getHomePage = (req, res) => {
     connection.query('SELECT * from Users', function (error, results) {
         if (error) throw error
         users = results
-        console.log('The solution is: ', results)
+        console.log('Accessed home page, data:', results[0], "...")
         res.render('sample.ejs', {
             pageTitle: 'Welcome to My Financial App',
             headerTitle: 'Dashboard',
