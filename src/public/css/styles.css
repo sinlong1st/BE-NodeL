@@ -4,8 +4,8 @@ body {
     color: #333;
     margin: 0;
     padding: 0;
-    /* background-image: url('/images/bg1.jpg'); */
 }
+
 header {
     background-color: #001f3f; /* Navy blue */
     padding: 20px;
@@ -14,10 +14,12 @@ header {
     font-family: 'Inter', cursive;
     color: #fff;
 }
+
 main {
     padding: 20px;
     text-align: center;
 }
+
 .card {
     background: #fff;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -26,6 +28,7 @@ main {
     margin: 20px auto;
     max-width: 600px;
 }
+
 footer {
     text-align: center;
     background: #001f3f; /* Navy blue */
@@ -35,6 +38,7 @@ footer {
     bottom: 0;
     width: 100%;
 }
+
 .button {
     display: inline-block;
     padding: 10px 20px;
@@ -49,4 +53,69 @@ footer {
 }
 .button:hover {
     background: #002244; /* Even darker navy blue */
+}
+/* Header container with flexbox for layout */
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #001f3f; /* Navy blue */
+    padding: 10px 20px;
+    color: #fff;
+    font-size: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+/* Title on the left */
+.header-title {
+    flex: 1; /* Takes as much space as needed */
+    font-weight: bold;
+    margin-left: 20px; /* Add some left margin to move it slightly */
+    text-align: left; /* Ensure alignment is explicitly set */
+}
+/* Navigation styling */
+.nav {
+    display: flex;
+    gap: 15px;
+}
+
+.nav a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 500;
+    padding: 5px 10px;
+    transition: background 0.3s, color 0.3s;
+}
+
+.nav a:hover {
+    background-color: #003366; /* Darker navy blue */
+    border-radius: 5px;
+    color: #cce7ff; /* Light blue */
+}
+
+/* Responsive design for the header */
+@media (max-width: 768px) {
+    .header-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #001f3f; /* Navy blue */
+        padding: 10px 0; /* Remove left/right padding to align completely to the edges */
+        color: #fff;
+        font-size: 1.5rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+    }
+
+    .nav {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        margin-top: 10px;
+    }
 }

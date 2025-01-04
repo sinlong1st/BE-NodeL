@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= pageTitle || "Welcome to My Cool App" %></title>
+    <title><%= pageTitle || "Alt App" %></title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Pacifico&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/styles.css">
     <style>
@@ -49,8 +49,16 @@
     </style>
 </head>
 <body>
-    <header>
-        <%= headerTitle || "Welcome!" %>
+    <header class="header-container">
+        <div class="header-title">
+            <%= headerTitle || "Welcome!" %>
+        </div>
+        <div class="nav">
+            <a href="/">Home</a>
+            <a href="/about">About</a>
+            <a href="/expense">Expense</a>
+            <a href="/spending">Spending</a>
+        </div>
     </header>
     <main>
         <div class="content-container">

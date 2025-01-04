@@ -6,7 +6,7 @@ const getHomePage = (req, res) => {
         if (error) throw error
         users = results
         console.log('Accessed home page, data:', results[0], "...")
-        res.render('sample.ejs', {
+        res.render('home.ejs', {
             pageTitle: 'Welcome to My Financial App',
             headerTitle: 'Dashboard',
             cardTitle: 'Register',
