@@ -51,9 +51,11 @@ footer {
     text-decoration: none;
     transition: background 0.3s;
 }
+
 .button:hover {
     background: #002244; /* Even darker navy blue */
 }
+
 /* Header container with flexbox for layout */
 .header-container {
     display: flex;
@@ -76,6 +78,7 @@ footer {
     margin-left: 20px; /* Add some left margin to move it slightly */
     text-align: left; /* Ensure alignment is explicitly set */
 }
+
 /* Navigation styling */
 .nav {
     display: flex;
@@ -118,4 +121,65 @@ footer {
         justify-content: flex-start;
         margin-top: 10px;
     }
+}
+
+/* Registration form styles */
+.registration-container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+.registration-container h1 {
+    text-align: center;
+    color: #001f3f;
+}
+
+.registration-container form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.registration-container label {
+    font-weight: bold;
+    color: #333;
+}
+
+.registration-container input,
+.registration-container select {
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.registration-container input:focus,
+.registration-container select:focus {
+    outline: none;
+    border-color: #001f3f;
+    box-shadow: 0 0 3px rgba(0, 31, 63, 0.5);
+}
+
+.button-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.button-container .button {
+    flex: 1; /* Ensures both buttons take up equal width */
+    text-align: center;
+    padding: 10px;
+}
+
+.button-container .button:first-child {
+    margin-right: 10px; /* Adds space between the two buttons */
+}
+
+.button-container .button:last-child {
+    margin-left: 10px; /* Adds space between the two buttons */
 }

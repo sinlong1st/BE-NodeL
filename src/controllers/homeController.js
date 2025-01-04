@@ -9,9 +9,9 @@ const getHomePage = (req, res) => {
         res.render('home.ejs', {
             pageTitle: 'Welcome to My Financial App',
             headerTitle: 'Dashboard',
-            cardTitle: 'Register',
-            cardContent: 'Register today for free! Get started today!',
-            buttonText: 'Learn More',
+            cardTitle: 'Sign up your plan',
+            cardContent: 'Register for free and get started today!',
+            buttonText: 'Register',
             buttonLink: '/learn-more',
             author: 'Admin',
             users: users // Pass the users array to the template
@@ -20,7 +20,7 @@ const getHomePage = (req, res) => {
 }
 
 const getLearnMorePage = (req, res) => {
-    res.render('underConstruction.ejs')
+    res.render('register.ejs')
 }
 module.exports = {
     getHomePage,
