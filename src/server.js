@@ -5,6 +5,8 @@ const webRoutes = require('./routes/web')
 const e = require('express')
 require('dotenv').config()
 const app = express()
+app.use(express.urlencoded({ extended: true }))
+app.use(express.json())
 
 // Const
 const port = process.env.PORT || 3001

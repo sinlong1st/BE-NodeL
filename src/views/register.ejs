@@ -6,16 +6,39 @@
     <title>User Registration</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script>
+        function hashPassword(event) {
+            event.preventDefault(); // Prevent default form submission
+            const passwordField = document.getElementById("password");
+            const hashedPasswordField = document.getElementById("hashedPassword");
 
+            // Hash the password using MD5
+            const hashedPassword = CryptoJS.MD5(passwordField.value).toString();
+
+            // Set the hashed password into the hidden field
+            hashedPasswordField.value = hashedPassword;
+
+            // Clear the plaintext password field
+            passwordField.value = "";
+
+            // Submit the form
+            document.querySelector("form").submit();
+        }
+    </script>
 </head>
 <body>
 
     <div class="registration-container">
         <h1>User Registration</h1>
-        <form action="/register" method="POST">
+        <form action="/register" method="POST" onsubmit="hashPassword(event)">
             <label for="email">Email:</label>
             <input type="email" id="email" name="email" placeholder="Enter your email" required>
-    
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            <input type="hidden" id="hashedPassword" name="hashedPassword">
+
             <label for="firstName">First Name:</label>
             <input type="text" id="firstName" name="firstName" placeholder="Enter your first name" required>
     
