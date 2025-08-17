@@ -25,13 +25,23 @@ const getLearnMorePage = (req, res) => {
 
 const postAddUser = (req, res) => {
     console.log('Registering user...')
-    // connection.query('INSERT INTO Users SET ?', { username, email, password }, function (error, results) {
-    //     if (error) throw error
-    //     console.log('User added to DB:', results)
-    //     res.redirect('/')
-    // })
-    console.log('User added to DB:', req.body)
-    res.send(req.body)
+    let {email, password, hashedPassword, firstName, lastName, address, city, state, zipcode } = req.body
+    sql = `INSERT INTO 
+        Users (email, password, firstName, lastName, address, city, state, zipcode)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+    connection.query(
+        sql, 
+        [email, hashedPassword, firstName, lastName, address, city, state, zipcode ], 
+        function (error, results) {
+            if (error) throw error
+            console.log('User added to DB:', results)
+            res.send(`
+                <script>
+                alert("User created successfully!");
+                window.location.href = "/";
+                </script>
+            `);
+    })
 }
 module.exports = {
     getHomePage,
