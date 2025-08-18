@@ -1,11 +1,13 @@
 const express = require('express')
-const {getHomePage, getLearnMorePage, postAddUser} = require('../controllers/homeController')
+const {getHomePage, getLearnMorePage, postAddUser, getAbout} = require('../controllers/homeController')
 const router = express.Router()
   
   router.get('/', getHomePage)
   
-  router.get('/learn-more', getLearnMorePage)
+  router.get('/register', getLearnMorePage)
 
   router.post('/register', postAddUser)
+
+  router.get('/about', getAbout)
 
   module.exports = router

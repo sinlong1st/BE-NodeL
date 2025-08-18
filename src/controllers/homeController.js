@@ -1,22 +1,36 @@
 const connection = require('../config/database')
 
-const getHomePage = (req, res) => {
+const getHomePage = async (req, res) => {
     users = []
-    connection.query('SELECT * from Users', function (error, results) {
-        if (error) throw error
-        users = results
-        console.log('\nAccessed home page\n')
-        res.render('home.ejs', {
-            pageTitle: 'Welcome to My Financial App',
-            headerTitle: 'Dashboard',
-            cardTitle: 'Sign up your plan',
-            cardContent: 'Register for free and get started today!',
-            buttonText: 'Register',
-            buttonLink: '/learn-more',
-            author: 'Admin',
-            users: users // Pass the users array to the template
-        });
-    })
+    // connection.query('SELECT * from Users', function (error, results) {
+    //     if (error) throw error
+    //     users = results
+    //     console.log('\nAccessed home page\n')
+    //     res.render('home.ejs', {
+    //         pageTitle: 'Welcome to My Financial App',
+    //         headerTitle: 'Dashboard',
+    //         cardTitle: 'Sign up your plan',
+    //         cardContent: 'Register for free and get started today!',
+    //         buttonText: 'Register',
+    //         buttonLink: '/register',
+    //         author: 'Admin',
+    //         users: users // Pass the users array to the template
+    //     });
+    // })
+    const [result, fields] = await connection.query('SELECT * from Users')
+    users = result
+    console.log('\nAccessed home page\n')
+    res.render('home.ejs', {
+        pageTitle: 'Welcome to My Financial App',
+        headerTitle: 'Dashboard',
+        cardTitle: 'Sign up your plan',
+        cardContent: 'Register for free and get started today!',
+        buttonText: 'Register',
+        buttonLink: '/register',
+        author: 'Admin',
+        users: users // Pass the users array to the template
+    });
+
 }
 
 const getLearnMorePage = (req, res) => {
@@ -43,8 +57,18 @@ const postAddUser = (req, res) => {
             `);
     })
 }
+
+const getAbout = (req, res) => {
+    res.render('about.ejs', {
+            pageTitle: 'About',
+            headerTitle: 'Dashboard',
+            author: "Admin"
+        });
+}
+
 module.exports = {
     getHomePage,
     getLearnMorePage,
-    postAddUser
+    postAddUser,
+    getAbout
 }
