@@ -1,5 +1,5 @@
 const express = require('express')
-const {getHomePage, getLearnMorePage, postAddUser, getAbout} = require('../controllers/homeController')
+const {getHomePage, getLearnMorePage, postAddUser, getAbout, getStats} = require('../controllers/homeController')
 const router = express.Router()
   
   router.get('/', getHomePage)
@@ -9,5 +9,7 @@ const router = express.Router()
   router.post('/register', postAddUser)
 
   router.get('/about', getAbout)
+
+  router.get('/stats', getStats)
 
   module.exports = router

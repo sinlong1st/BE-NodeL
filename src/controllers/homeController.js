@@ -18,8 +18,9 @@ const getHomePage = async (req, res) => {
     //     });
     // })
     const [result, fields] = await connection.query('SELECT * from Users')
+    // console.log(fields)
     users = result
-    console.log('\nAccessed home page\n')
+    console.log('\nNavigating to home page\n')
     res.render('home.ejs', {
         pageTitle: 'Welcome to My Financial App',
         headerTitle: 'Dashboard',
@@ -37,25 +38,45 @@ const getLearnMorePage = (req, res) => {
     res.render('register.ejs')
 }
 
-const postAddUser = (req, res) => {
+const getStats = (req, res) => {
+    res.render('stats.ejs', {
+            pageTitle: 'About',
+            headerTitle: 'Dashboard',
+            author: "Admin"
+        });
+}
+
+const postAddUser = async (req, res) => {
     console.log('Registering user...')
     let {email, password, hashedPassword, firstName, lastName, address, city, state, zipcode } = req.body
     sql = `INSERT INTO 
         Users (email, password, firstName, lastName, address, city, state, zipcode)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-    connection.query(
+    // connection.query(
+    //     sql, 
+    //     [email, hashedPassword, firstName, lastName, address, city, state, zipcode ], 
+    //     function (error, results) {
+    //         if (error) throw error
+    //         console.log('User added to DB:', results)
+    //         res.send(`
+    //             <script>
+    //             alert("User created successfully!");
+    //             window.location.href = "/";
+    //             </script>
+    //         `);
+    // });
+    const [result, fields] = await connection.query(
         sql, 
-        [email, hashedPassword, firstName, lastName, address, city, state, zipcode ], 
-        function (error, results) {
-            if (error) throw error
-            console.log('User added to DB:', results)
-            res.send(`
+        [email, hashedPassword, firstName, lastName, address, city, state, zipcode ]
+    )
+    console.log(result)
+    res.send(`
                 <script>
                 alert("User created successfully!");
                 window.location.href = "/";
                 </script>
             `);
-    })
+
 }
 
 const getAbout = (req, res) => {
@@ -70,5 +91,6 @@ module.exports = {
     getHomePage,
     getLearnMorePage,
     postAddUser,
-    getAbout
+    getAbout,
+    getStats
 }
