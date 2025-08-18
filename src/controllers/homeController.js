@@ -20,7 +20,11 @@ const getHomePage = async (req, res) => {
 }
 
 const getLearnMorePage = (req, res) => {
-    res.render('register.ejs')
+    res.render('register.ejs', {
+            pageTitle: 'About',
+            headerTitle: 'Dashboard',
+            author: "Admin",
+        })
 }
 
 const getStats = async (req, res) => {
