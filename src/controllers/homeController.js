@@ -2,21 +2,6 @@ const connection = require('../config/database')
 
 const getHomePage = async (req, res) => {
     users = []
-    // connection.query('SELECT * from Users', function (error, results) {
-    //     if (error) throw error
-    //     users = results
-    //     console.log('\nAccessed home page\n')
-    //     res.render('home.ejs', {
-    //         pageTitle: 'Welcome to My Financial App',
-    //         headerTitle: 'Dashboard',
-    //         cardTitle: 'Sign up your plan',
-    //         cardContent: 'Register for free and get started today!',
-    //         buttonText: 'Register',
-    //         buttonLink: '/register',
-    //         author: 'Admin',
-    //         users: users // Pass the users array to the template
-    //     });
-    // })
     const [result, fields] = await connection.query('SELECT * from Users')
     // console.log(fields)
     users = result
@@ -38,36 +23,40 @@ const getLearnMorePage = (req, res) => {
     res.render('register.ejs')
 }
 
-const getStats = (req, res) => {
+const getStats = async (req, res) => {
+    let [result, fields] = await connection.query('SELECT * from Users')
+    let totalBalance = 0
+    let accountHasBalance = 0
+    let accountNull
+
+    console.log(result)
+    for (i=0; i < result.length; i++){
+        totalBalance += result[i].balance;
+        if (result[i].balance != 0) {
+            accountHasBalance += 1
+        }
+    }
+    accountNull = result.length - accountHasBalance
     res.render('stats.ejs', {
             pageTitle: 'About',
             headerTitle: 'Dashboard',
-            author: "Admin"
+            author: "Admin",
+            totalBalance: totalBalance,
+            accountHasBalance: accountHasBalance,
+            accountNull: accountNull,
+            totalAccount: result.length
         });
 }
 
 const postAddUser = async (req, res) => {
     console.log('Registering user...')
-    let {email, password, hashedPassword, firstName, lastName, address, city, state, zipcode } = req.body
+    let {email, password, hashedPassword, firstName, lastName, address, city, state, zipcode, deposit } = req.body
     sql = `INSERT INTO 
-        Users (email, password, firstName, lastName, address, city, state, zipcode)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-    // connection.query(
-    //     sql, 
-    //     [email, hashedPassword, firstName, lastName, address, city, state, zipcode ], 
-    //     function (error, results) {
-    //         if (error) throw error
-    //         console.log('User added to DB:', results)
-    //         res.send(`
-    //             <script>
-    //             alert("User created successfully!");
-    //             window.location.href = "/";
-    //             </script>
-    //         `);
-    // });
+        Users (email, password, firstName, lastName, address, city, state, zipcode, balance)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
     const [result, fields] = await connection.query(
         sql, 
-        [email, hashedPassword, firstName, lastName, address, city, state, zipcode ]
+        [email, hashedPassword, firstName, lastName, address, city, state, zipcode, deposit ]
     )
     console.log(result)
     res.send(`

@@ -31,7 +31,8 @@
         </div>
     </header>
     <main style="max-width: 900px; margin: 2rem auto; font-family: Arial, sans-serif;">
-        <h1>STATISTICS</h1>
+        <h1 style="text-align: left;">STATISTICS</h1>
+        <h2 style="text-align: left;">Total Balance: $<%= totalBalance%></h2>
 
         <section style="display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center;">
             <!-- Line Chart -->
@@ -42,22 +43,26 @@
 
             <!-- Bar Chart -->
             <div style="flex: 1 1 400px;">
-            <h2>Active Users</h2>
+            <h2>Account Balance Stats</h2>
             <canvas id="barChart"></canvas>
             </div>
         </section>
 
         <!-- Chart.js CDN -->
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        
         <script>
+            const accountHasBalance = JSON.parse('<%- JSON.stringify(accountHasBalance) %>');
+            const accountNull = JSON.parse('<%- JSON.stringify(accountNull) %>');
+            const totalAccount = JSON.parse('<%- JSON.stringify(totalAccount) %>');
             // Line Chart
             new Chart(document.getElementById("lineChart"), {
             type: "line",
             data: {
-                labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+                labels: ["Mar", "Apr", "May", "Jun", "Jul", "Aug"],
                 datasets: [{
                 label: "Users",
-                data: [52, 73, 152, 193, 194, 202],
+                data: [0, 2, 4, 5, 7, totalAccount],
                 borderColor: "rgba(54, 162, 235, 1)",
                 backgroundColor: "rgba(54, 162, 235, 0.2)",
                 fill: true,
@@ -70,15 +75,13 @@
             new Chart(document.getElementById("barChart"), {
             type: "bar",
             data: {
-                labels: ["Chrome", "Firefox", "Safari", "Edge"],
+                labels: ["Account with Balance", "Account Empty"],
                 datasets: [{
-                label: "Visitors",
-                data: [108, 63, 72, 40],
+                label: "Accounts",
+                data: [accountHasBalance, accountNull],
                 backgroundColor: [
-                    "rgba(255, 99, 132, 0.6)",
                     "rgba(54, 162, 235, 0.6)",
-                    "rgba(255, 206, 86, 0.6)",
-                    "rgba(75, 192, 192, 0.6)"
+                    "rgba(255, 99, 132, 0.6)"
                 ]
                 }]
             },
