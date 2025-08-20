@@ -78,6 +78,7 @@
                             <th>First Name</th>
                             <th>Last Name</th>
                             <th>Balance</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -89,6 +90,15 @@
                                     <td><%= user.firstName %></td>
                                     <td><%= user.lastName %></td>
                                     <td>$<%= user.balance %></td>
+                                    <td>
+                                        <ol><a class="btn" href="/users/<%= user.id %>/edit">🔄 Edit</a></ol>
+
+                                        <ol>
+                                            <form method="POST" action="/users/<%= user.id %>?_method=DELETE" style="display:inline">
+                                            <button type="submit" class="btn danger" onclick="return confirm('Delete this user?')">❌ Remove</button>
+                                            </form>
+                                        </ol>
+                                    </td>
                                 </tr>
                             <% }) %>
                         <% } else { %>

@@ -12,4 +12,6 @@ const router = express.Router()
 
   router.get('/stats', getStats)
 
+  router.get('/users/:id/edit')
+
   module.exports = router
