@@ -1,5 +1,5 @@
 const express = require('express')
-const {getHomePage, getLearnMorePage, postAddUser, getAbout, getStats} = require('../controllers/homeController')
+const {getHomePage, getLearnMorePage, postAddUser, getAbout, getStats, getEditUser} = require('../controllers/homeController')
 const router = express.Router()
   
   router.get('/', getHomePage)
@@ -12,6 +12,6 @@ const router = express.Router()
 
   router.get('/stats', getStats)
 
-  router.get('/users/:id/edit')
+  router.get('/users/:id/edit', getEditUser)
 
   module.exports = router

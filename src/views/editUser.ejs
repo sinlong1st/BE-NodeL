@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title><%= pageTitle || 'Edit User' %></title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/styles.css">
+  <style>
+    .section-card { background:#fff; border-radius:14px; padding:20px; box-shadow:0 6px 18px rgba(0,0,0,0.06); margin:18px auto; max-width:900px; }
+    .grid-2 { display:grid; grid-template-columns: 1fr 1fr; gap: 35px; }
+    .grid-3 { display:grid; grid-template-columns: 1fr 1fr 120px; gap:10px; align-items:center; }
+    label { font-weight:600; margin-top:10px; display:block; }
+    input, select { width:100%; padding:10px; border:1px solid #ddd; border-radius:10px; font-family:inherit; }
+    .header-container { display:flex; justify-content:space-between; align-items:center; padding:16px 24px; background:#0f172a; color:#fff; }
+    .header-title { font-weight:600; }
+    .nav a { color:#cbd5e1; margin-left:14px; text-decoration:none; }
+    .button { display:inline-block; padding:10px 14px; border-radius:10px; background:#0ea5e9; color:#fff; text-decoration:none; border:none; cursor:pointer; }
+    .button.secondary { background:#64748b; }
+    .button.danger { background:#ef4444; }
+    .muted { color:#64748b; font-size:0.9rem; }
+    .table { width:100%; border-collapse:collapse; margin-top:12px; }
+    .table th, .table td { border-bottom:1px solid #eee; text-align:left; padding:8px 6px; }
+    .row-actions { display:flex; gap:8px; }
+    .inline-note { font-size:0.9rem; color:#475569; margin:6px 0 0; }
+    .weight-row {
+        display: grid;
+        grid-template-columns: 150px 1fr auto; /* weight | datetime | remove btn */
+        gap: 35px; /* spacing between fields */
+        align-items: end;
+        }
+
+        /* keep inputs neat */
+        .weight-row input {
+        min-width: 0;
+        }
+
+        /* row-actions spacing */
+        .row-actions {
+        display: flex;
+        justify-content: flex-start;
+        gap: 8px;       /* space between multiple buttons (if you add more later) */
+        }
+
+        /* ensure the Remove button doesn’t hug the edge */
+        .row-actions .button {
+        margin-left: 4px;  /* subtle left offset */
+        }
+  </style>
+</head>
+<body>
+  <header class="header-container">
+    <div class="header-title"><%= headerTitle || "Dashboard" %></div>
+    <div class="nav">
+      <a href="/">Home</a>
+      <a href="/about">About</a>
+      <a href="/register">Register</a>
+      <a href="/stats">Reports</a>
+    </div>
+  </header>
+
+  <!-- Edit User Profile -->
+  <div class="section-card">
+    <h1 style="margin:0 0 8px;">Edit User</h1>
+    <p class="muted">Author: <%= author || 'Admin' %></p>
+
+    <!-- If using method-override for PUT: include hidden _method -->
+    <form action="/users/<%= user.id %>?_method=PUT" method="POST">
+      <div class="grid-2">
+        <div>
+          <label for="id">User ID</label>
+          <input id="id" name="id" value="<%= user.id %>" readonly>
+        </div>
+
+        <div>
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" value="<%= user.email || '' %>" required>
+        </div>
+
+        <div>
+          <label for="firstName">First Name</label>
+          <input id="firstName" name="firstName" value="<%= user.firstName || '' %>" required>
+        </div>
+
+        <div>
+          <label for="lastName">Last Name</label>
+          <input id="lastName" name="lastName" value="<%= user.lastName || '' %>" required>
+        </div>
+
+        <div>
+          <label for="address">Address</label>
+          <input id="address" name="address" value="<%= user.address || '' %>" required>
+        </div>
+
+        <div>
+          <label for="city">City</label>
+          <input id="city" name="city" value="<%= user.city || '' %>" required>
+        </div>
+
+        <div>
+          <label for="state">State</label>
+          <select id="state" name="state" required>
+            <option value="" disabled <%= !user.state ? 'selected' : '' %>>Select your state</option>
+            <option value="California" <%= user.state === 'California' ? 'selected' : '' %>>California</option>
+            <option value="Texas" <%= user.state === 'Texas' ? 'selected' : '' %>>Texas</option>
+            <option value="New York" <%= user.state === 'New York' ? 'selected' : '' %>>New York</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="zipcode">Zipcode</label>
+          <input id="zipcode" name="zipcode" value="<%= user.zipcode || '' %>" required>
+        </div>
+
+        <div>
+          <label for="balance">Balance ($)</label>
+          <input id="balance" name="balance" type="number" step="0.01" min="0" value="<%= (user.balance ?? 0).toString() %>">
+          <p class="inline-note">This is the current account balance.</p>
+        </div>
+      </div>
+
+      <div style="margin-top:16px; display:flex; gap:10px;">
+        <button type="submit" class="button">Save Changes</button>
+        <a href="/" class="button secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+
+  <!-- Weight Tracker: add multiple entries -->
+  <div class="section-card">
+    <h2 style="margin-top:0;">Weight Tracker</h2>
+    <p class="muted">Add one or more weight entries with timestamps. You can remove rows before submitting.</p>
+
+    <!-- POST weights as arrays: weight[] and taken_at[] -->
+    <form id="weightsForm" action="/users/<%= user.id %>/weights" method="POST">
+      <div id="weightRows" class="rows" style="margin-top:8px;">
+        <!-- one default row -->
+        <div class="weight-row grid-3">
+          <div>
+            <label>Weight (kg)</label>
+            <input name="weight[]" type="number" step="0.1" min="0" placeholder="e.g., 71.5" required>
+          </div>
+          <div>
+            <label>Taken At</label>
+            <input name="taken_at[]" type="datetime-local" required>
+          </div>
+          <div class="row-actions" style="margin-top:26px;">
+            <button type="button" class="button danger" onclick="removeRow(this)" title="Remove row">Remove</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px; display:flex; gap:10px;">
+        <button type="button" class="button" onclick="addRow()">+ Add another entry</button>
+        <button type="submit" class="button">Save Weight Entries</button>
+      </div>
+    </form>
+
+    <!-- Existing weights (optional) -->
+    <% if (typeof weights !== 'undefined' && weights && weights.length) { %>
+      <h3 style="margin-top:22px;">Existing Entries</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Weight (lb)</th>
+            <th>Taken At</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% weights.forEach((w, idx) => { %>
+            <tr>
+              <td><%= idx + 1 %></td>
+              <td><%= w.weight %></td>
+              <td><%= new Date(w.taken_at).toLocaleString() %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } %>
+  </div>
+
+  <script>
+    function addRow() {
+      const container = document.getElementById('weightRows');
+      const wrapper = document.createElement('div');
+      wrapper.className = 'weight-row grid-3';
+      wrapper.innerHTML = `
+        <div>
+          <label>Weight (lb)</label>
+          <input name="weight[]" type="number" step="0.1" min="0" placeholder="e.g., 162.5" required>
+        </div>
+        <div>
+          <label>Taken At</label>
+          <input name="taken_at[]" type="datetime-local" required>
+        </div>
+        <div class="row-actions" style="margin-top:26px;">
+          <button type="button" class="button danger" onclick="removeRow(this)">Remove</button>
+        </div>
+      `;
+      container.appendChild(wrapper);
+    }
+
+    function removeRow(btn) {
+      const row = btn.closest('.weight-row');
+      if (!row) return;
+      const rows = document.querySelectorAll('.weight-row');
+      // Keep at least one row visible
+      if (rows.length === 1) {
+        // just clear fields if last row
+        row.querySelectorAll('input').forEach(i => i.value = '');
+      } else {
+        row.remove();
+      }
+    }
+  </script>
+</body>
+</html>

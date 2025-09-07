@@ -80,10 +80,23 @@ const getAbout = (req, res) => {
         });
 }
 
+const getEditUser = async (req, res) => {
+    const userId = req.params.id; 
+    let [result, fields] = await connection.query(`SELECT * from Users where id = ${userId}`)
+
+    res.render('editUser.ejs', {
+            pageTitle: 'Edit User',
+            headerTitle: 'Dashboard',
+            author: "Admin",
+            user: result[0]
+        });
+}
+
 module.exports = {
     getHomePage,
     getLearnMorePage,
     postAddUser,
     getAbout,
-    getStats
+    getStats,
+    getEditUser
 }
