@@ -40,6 +40,7 @@ The project currently supports **MySQL (relational)** and **MongoDB (NoSQL with 
 git clone https://github.com/your-username/your-repo.git
 cd your-repo
 npm install
+```
 
 # Database Schema Documentation
 
