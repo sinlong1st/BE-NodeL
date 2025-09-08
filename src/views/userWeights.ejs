@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title><%= pageTitle || ('Weights • ' + (user?.firstName || 'User')) %></title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/styles.css">
+  <style>
+    .section-card { background:#fff; border-radius:14px; padding:20px; box-shadow:0 6px 18px rgba(0,0,0,0.06); margin:18px auto; max-width:900px; }
+    .table { width:100%; border-collapse:collapse; margin-top:12px; }
+    .table th, .table td { border-bottom:1px solid #eee; text-align:left; padding:8px 6px; }
+    .header-container { display:flex; justify-content:space-between; align-items:center; padding:16px 24px; background:#0f172a; color:#fff; }
+    .nav a { color:#cbd5e1; margin-left:14px; text-decoration:none; }
+    .button { display:inline-block; padding:10px 14px; border-radius:10px; background:#0ea5e9; color:#fff; text-decoration:none; border:none; cursor:pointer; }
+    .button.secondary { background:#64748b; }
+    .button.danger { background:#ef4444; }
+    .muted { color:#64748b; font-size:0.9rem; }
+
+    .grid-3 { display:grid; grid-template-columns: 150px 1fr 120px; gap:10px; align-items:end; }
+    .weight-row { display:grid; grid-template-columns: 150px 1fr auto; gap:35px; align-items:end; }
+    label { font-weight:600; margin-top:10px; display:block; }
+    input { width:100%; padding:10px; border:1px solid #ddd; border-radius:10px; font-family:inherit; }
+  </style>
+</head>
+<body>
+  <header class="header-container">
+    <div><strong>Weight Tracker</strong></div>
+    <div class="nav">
+      <a href="/">Home</a>
+      <a href="/users/<%= user.id %>/edit">Back to Edit User</a>
+    </div>
+  </header>
+
+  <div class="section-card">
+    <h1 style="margin:0 0 8px;">Weights for <%= user.firstName %> <%= user.lastName %></h1>
+
+    <% if (!Array.isArray(weights) || !weights.length) { %>
+      <div style="margin-top:22px; color:#64748b; font-size:1.1em;">No weight records found for this user.</div>
+    <% } %>
+    <p class="muted">Add one or more weight entries with timestamps. You can remove rows before submitting.</p>
+
+    <!-- POST weights as arrays: weight[] and taken_at[] -->
+    <form id="weightsForm" action="/users/<%= user.id %>/weights" method="POST">
+      <div id="weightRows" class="rows" style="margin-top:8px;">
+        <!-- one default row -->
+        <div class="weight-row">
+          <div>
+            <label>Weight (kg)</label>
+            <input name="weight[]" type="number" step="0.1" min="0" placeholder="e.g., 62.5" required>
+          </div>
+          <div>
+            <label>Taken At</label>
+            <input name="taken_at[]" type="datetime-local" required>
+          </div>
+          <div>
+            <button type="button" class="button danger" onclick="removeRow(this)" style="margin-top:26px;">Remove</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px; display:flex; gap:10px;">
+        <button type="button" class="button" onclick="addRow()">+ Add another entry</button>
+        <button type="submit" class="button">Save Weight Entries</button>
+      </div>
+    </form>
+
+    <div style="margin-bottom:18px;">
+      <a href="/users/<%= user.id %>/weights/trend" class="button">View Trending</a>
+    </div>
+    <% if (Array.isArray(weights) && weights.length) { %>
+      <h3 style="margin-top:22px;">Existing Data</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Weight (kg)</th>
+            <th>Taken At</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% weights.forEach((w, idx) => { %>
+            <tr>
+              <td><%= idx + 1 %></td>
+              <td><%= w.weight_kg %></td>
+              <td><%= new Date(w.taken_at_utc).toLocaleString() %></td>
+              <td>
+                <a href="/users/<%= user.id %>/weights/<%= w.id %>/edit" class="button secondary" style="margin-right:6px;">Edit</a>
+                <form action="/users/<%= user.id %>/weights/<%= w.id %>?_method=DELETE" method="POST" style="display:inline;">
+                  <button type="submit" class="button danger" onclick="return confirm('Are you sure you want to delete this entry?');">Delete</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } %>
+  </div>
+
+  <script>
+    function addRow() {
+      const container = document.getElementById('weightRows');
+      const wrapper = document.createElement('div');
+      wrapper.className = 'weight-row';
+      wrapper.innerHTML = `
+        <div>
+          <label>Weight (lb)</label>
+          <input name="weight[]" type="number" step="0.1" min="0" placeholder="e.g., 162.5" required>
+        </div>
+        <div>
+          <label>Taken At</label>
+          <input name="taken_at[]" type="datetime-local" required>
+        </div>
+        <div>
+          <button type="button" class="button danger" onclick="removeRow(this)" style="margin-top:26px;">Remove</button>
+        </div>
+      `;
+      container.appendChild(wrapper);
+    }
+
+    function removeRow(btn) {
+      const row = btn.closest('.weight-row');
+      if (!row) return;
+      const rows = document.querySelectorAll('.weight-row');
+      if (rows.length === 1) {
+        row.querySelectorAll('input').forEach(i => i.value = '');
+      } else {
+        row.remove();
+      }
+    }
+  </script>
+</body>
+</html>

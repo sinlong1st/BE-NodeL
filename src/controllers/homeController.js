@@ -92,11 +92,62 @@ const getEditUser = async (req, res) => {
         });
 }
 
+const getUserWeights = async (req, res) => {
+    const userId = req.params.id;
+    try {
+        // Query user info
+        const [userResult] = await connection.query('SELECT * FROM Users WHERE id = ?', [userId]);
+        const user = userResult[0];
+        if (!user) {
+            return res.status(404).send('User not found');
+        }
+        // Query all weights for the user (patient) by id
+        const [weights] = await connection.query(
+            'SELECT * FROM UserWeights WHERE user_id = ?',
+            [userId]
+        );
+        res.render('userWeights.ejs', {
+            pageTitle: 'User Weights',
+            headerTitle: 'Dashboard',
+            author: 'Admin',
+            weights: weights,
+            user: user
+        });
+    } catch (err) {
+        console.error('Error fetching user weights:', err);
+        res.status(500).send('Error fetching user weights');
+    }
+}
+
+const postUserWeights = async (req, res) => {
+    const userId = req.params.id;
+    let { weight, taken_at } = req.body;
+    // Ensure weight and taken_at are arrays
+    if (!Array.isArray(weight)) weight = [weight];
+    if (!Array.isArray(taken_at)) taken_at = [taken_at];
+    try {
+        const values = weight.map((w, i) => [userId, w, taken_at[i]]);
+        // Insert all weights in one query if possible
+        if (values.length > 0) {
+            await connection.query(
+                'INSERT INTO UserWeights (user_id, weight_kg, taken_at_utc) VALUES ' + values.map(() => '(?, ?, ?)').join(', '),
+                values.flat()
+            );
+        }
+        res.redirect(`/users/${userId}/weights`);
+    } catch (err) {
+        console.error('Error inserting user weights:', err);
+        res.status(500).send('Error saving weights');
+    }
+}
+
 module.exports = {
     getHomePage,
     getLearnMorePage,
     postAddUser,
     getAbout,
     getStats,
-    getEditUser
+    getEditUser,
+    getUserWeights,
+    postUserWeights
 }
