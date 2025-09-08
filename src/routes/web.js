@@ -1,7 +1,7 @@
 const express = require('express')
 const {getHomePage, getLearnMorePage, postAddUser, 
   getAbout, getStats, getEditUser, getUserWeights,
-  postUserWeights} = require('../controllers/homeController')
+  postUserWeights, getWeightTrend} = require('../controllers/homeController')
 const router = express.Router()
   
   router.get('/', getHomePage)
@@ -19,5 +19,7 @@ const router = express.Router()
   router.get('/users/:id/weights', getUserWeights)
 
   router.post('/users/:id/weights', postUserWeights)
+
+  router.get('/users/:id/weights/trend', getWeightTrend)
 
   module.exports = router

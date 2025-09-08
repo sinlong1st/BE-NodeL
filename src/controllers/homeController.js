@@ -141,6 +141,33 @@ const postUserWeights = async (req, res) => {
     }
 }
 
+const getWeightTrend = async (req, res) => {
+    const userId = req.params.id;
+    try {
+        // Query user info
+        const [userResult] = await connection.query('SELECT * FROM Users WHERE id = ?', [userId]);
+        const user = userResult[0];
+        if (!user) {
+            return res.status(404).send('User not found');
+        }
+        // Query all weights for the user (patient) by id
+        const [weights] = await connection.query(
+            'SELECT * FROM UserWeights WHERE user_id = ? ORDER BY taken_at_utc ASC',
+            [userId]
+        );
+        res.render('weightTrend.ejs', {
+            pageTitle: 'Weight Trend',
+            headerTitle: 'Dashboard',
+            author: 'Admin',
+            user: user,
+            weights: weights
+        });
+    } catch (err) {
+        console.error('Error fetching weight trend:', err);
+        res.status(500).send('Error fetching weight trend');
+    }
+}
+
 module.exports = {
     getHomePage,
     getLearnMorePage,
@@ -149,5 +176,6 @@ module.exports = {
     getStats,
     getEditUser,
     getUserWeights,
-    postUserWeights
+    postUserWeights,
+    getWeightTrend
 }

@@ -65,8 +65,8 @@
       </div>
     </form>
 
-    <div style="margin-bottom:18px;">
-      <a href="/users/<%= user.id %>/weights/trend" class="button">View Trending</a>
+    <div style="margin:32px 0 18px 0; text-align:left;">
+      <a href="/users/<%= user.id %>/weights/trend" class="button" style="font-size:1.1em; padding:14px 28px; background:#0f172a; color:#fff; border-radius:14px; box-shadow:0 2px 8px rgba(14,165,233,0.08); letter-spacing:0.5px;">📈 View Trending</a>
     </div>
     <% if (Array.isArray(weights) && weights.length) { %>
       <h3 style="margin-top:22px;">Existing Data</h3>

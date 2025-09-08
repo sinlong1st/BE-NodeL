@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Weight Trend Analysis</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Pacifico&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/styles.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
@@ -34,6 +35,17 @@
           <li>Latest weight: <strong><%= weights[weights.length-1].weight_kg %> kg</strong> on <%= new Date(weights[weights.length-1].taken_at_utc).toLocaleDateString() %></li>
           <li>Change: <strong><%= (weights[weights.length-1].weight_kg - weights[0].weight_kg).toFixed(2) %> kg</strong></li>
           <li>Average weight: <strong><%= (weights.reduce((a, w) => a + parseFloat(w.weight_kg), 0) / weights.length).toFixed(2) %> kg</strong></li>
+          <% if (user && user.height_cm) { 
+               const heightM = user.height_cm / 100;
+               const bmi = (weights[weights.length-1].weight_kg / (heightM * heightM)).toFixed(2);
+          %>
+            <li>Latest BMI: <strong><%= bmi %></strong> (using height <%= user.height_cm %> cm)</li>
+            <li>BMI Category: <strong>
+              <% if (bmi < 18.5) { %>Underweight<% } else if (bmi < 25) { %>Normal<% } else if (bmi < 30) { %>Overweight<% } else { %>Obese<% } %>
+            </strong></li>
+          <% } else { %>
+            <li class="muted">No height data for BMI calculation.</li>
+          <% } %>
         </ul>
       <% } else { %>
         <div class="muted">Not enough data for analysis.</div>
