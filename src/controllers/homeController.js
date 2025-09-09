@@ -164,12 +164,43 @@ const getWeightTrend = async (req, res) => {
                          ORDER BY uw.taken_at_utc ASC`,
                         [userId, userId]
                 );
+                // Prepare chart labels and datetimes for EJS (date and date+time)
+                const chartLabels = weights.map(w => {
+                    const d = new Date(w.taken_at_utc);
+                    return d.toLocaleDateString();
+                });
+                const chartDatetimes = weights.map(w => {
+                    const d = new Date(w.taken_at_utc);
+                    return d.toLocaleString();
+                });
+
+                // Body composition proxy: estimate body fat % (BMI-based, for adults)
+                let bodyFatEstimate = null;
+                let bodyFatMethod = null;
+                if (user && user.height_cm && weights.length > 0) {
+                    // BMI method (Deurenberg formula, for adults)
+                    // BF% = 1.20 * BMI + 0.23 * age - 10.8 * sex - 5.4
+                    // We'll use sex=1 for male, 0 for female, age=30 as a placeholder
+                    // (You can improve this if you have age/sex data)
+                    const latestWeight = weights[weights.length-1].weight_kg;
+                    const heightM = user.height_cm / 100;
+                    const bmi = latestWeight / (heightM * heightM);
+                    const age = user.age || 30; // fallback
+                    const sex = user.sex === 'female' ? 0 : 1; // fallback to male
+                    bodyFatEstimate = (1.20 * bmi + 0.23 * age - 10.8 * sex - 5.4).toFixed(1);
+                    bodyFatMethod = 'BMI-based (Deurenberg formula, est. adult)';
+                }
+
                 res.render('weightTrend.ejs', {
-                        pageTitle: 'Weight Trend',
-                        headerTitle: 'Dashboard',
-                        author: 'Admin',
-                        user: user,
-                        weights: weights
+                                pageTitle: 'Weight Trend',
+                                headerTitle: 'Dashboard',
+                                author: 'Admin',
+                                user: user,
+                                weights: weights,
+                                chartLabels,
+                                chartDatetimes,
+                                bodyFatEstimate,
+                                bodyFatMethod
                 });
     } catch (err) {
         console.error('Error fetching weight trend:', err);

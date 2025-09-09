@@ -26,8 +26,18 @@
   <div class="section-card">
     <h1>Weight Trend for <%= user.firstName %> <%= user.lastName %></h1>
     <p class="muted">Below is a chart showing the weight trend over time. You can use this to monitor progress and spot trends.</p>
-    <canvas id="weightChart" width="800" height="350"></canvas>
+    <% if (weights && weights.length > 1) { %>
+      <canvas id="weightChart" width="800" height="350"></canvas>
+    <% } else { %>
+      <div style="width:100%; height:350px; display:flex; align-items:center; justify-content:center; background:#f1f5f9; border-radius:12px; font-size:2.2em; color:#64748b; font-weight:700; letter-spacing:2px; margin-bottom:18px;">NO DATA</div>
+    <% } %>
     <div style="margin-top:24px;">
+      <% if (typeof bodyFatEstimate !== 'undefined' && bodyFatEstimate !== null) { %>
+  <div style="background:#f1f5f9; border-radius:10px; padding:12px 24px; margin-bottom:18px; width:100%; box-sizing:border-box;">
+          <strong>Estimated Body Fat %:</strong> <span style="font-size:1.2em; font-weight:600; color:#0ea5e9;"><%= bodyFatEstimate %>%</span>
+          <span class="muted" style="font-size:0.95em; margin-left:8px;">(<%= bodyFatMethod %>)</span>
+        </div>
+      <% } %>
         <h3>Analysis</h3>
       <% if (weights && weights.length > 1) { %>
   <ul style="padding-left:18px;">
@@ -79,15 +89,9 @@
   </div>
 
   <script>
-  var labels = <%- JSON.stringify(weights.map(w => {
-    const d = new Date(w.taken_at_utc);
-    return d.toLocaleDateString();
-  })) %>;
+  var labels = <%- JSON.stringify(chartLabels) %>;
   var data = <%- JSON.stringify(weights.map(w => w.weight_kg)) %>;
-  var datetimes = <%- JSON.stringify(weights.map(w => {
-    const d = new Date(w.taken_at_utc);
-    return d.toLocaleString();
-  })) %>;
+  var datetimes = <%- JSON.stringify(chartDatetimes) %>;
   var minY = Math.min.apply(null, data);
   var maxY = Math.max.apply(null, data);
   minY = Math.floor(minY - 2); // Set y-axis min a bit below the lowest weight
