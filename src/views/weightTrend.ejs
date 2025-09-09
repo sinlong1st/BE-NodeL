@@ -28,28 +28,53 @@
     <p class="muted">Below is a chart showing the weight trend over time. You can use this to monitor progress and spot trends.</p>
     <canvas id="weightChart" width="800" height="350"></canvas>
     <div style="margin-top:24px;">
-      <h3>Analysis</h3>
+        <h3>Analysis</h3>
       <% if (weights && weights.length > 1) { %>
-        <ul>
-          <li>Starting weight: <strong><%= weights[0].weight_kg %> kg</strong> on <%= new Date(weights[0].taken_at_utc).toLocaleDateString() %></li>
-          <li>Latest weight: <strong><%= weights[weights.length-1].weight_kg %> kg</strong> on <%= new Date(weights[weights.length-1].taken_at_utc).toLocaleDateString() %></li>
-          <li>Change: <strong><%= (weights[weights.length-1].weight_kg - weights[0].weight_kg).toFixed(2) %> kg</strong></li>
-          <li>Average weight: <strong><%= (weights.reduce((a, w) => a + parseFloat(w.weight_kg), 0) / weights.length).toFixed(2) %> kg</strong></li>
+  <ul style="padding-left:18px;">
+          <li style="margin-bottom:12px;">Starting weight: <strong><%= weights[0].weight_kg %> kg</strong> on <%= new Date(weights[0].taken_at_utc).toLocaleDateString() %></li>
+          <li style="margin-bottom:12px;">Latest weight: <strong><%= weights[weights.length-1].weight_kg %> kg</strong> on <%= new Date(weights[weights.length-1].taken_at_utc).toLocaleDateString() %></li>
+          <li style="margin-bottom:12px;">Change: <strong><%= (weights[weights.length-1].weight_kg - weights[0].weight_kg).toFixed(2) %> kg</strong></li>
+          <li style="margin-bottom:12px;">Average weight: <strong><%= (weights.reduce((a, w) => a + parseFloat(w.weight_kg), 0) / weights.length).toFixed(2) %> kg</strong></li>
           <% if (user && user.height_cm) { 
                const heightM = user.height_cm / 100;
                const bmi = (weights[weights.length-1].weight_kg / (heightM * heightM)).toFixed(2);
           %>
-            <li>Latest BMI: <strong><%= bmi %></strong> (using height <%= user.height_cm %> cm)</li>
-            <li>BMI Category: <strong>
-              <% if (bmi < 18.5) { %>Underweight<% } else if (bmi < 25) { %>Normal<% } else if (bmi < 30) { %>Overweight<% } else { %>Obese<% } %>
-            </strong></li>
+            <li style="margin-bottom:12px;">Latest BMI: <strong><%= bmi %></strong> (using height <%= user.height_cm %> cm)</li>
+            <li style="margin-bottom:12px;">BMI Category: 
+              <% if (bmi < 18.5) { %>
+                <span style="display:inline-block; padding:2px 12px; border-radius:16px; background:#e0e7ff; color:#1e40af; font-weight:600; font-size:1.5em; margin-left:4px;">Underweight</span>
+              <% } else if (bmi < 25) { %>
+                <span style="display:inline-block; padding:2px 12px; border-radius:16px; background:#dcfce7; color:#15803d; font-weight:600; font-size:1.5em; margin-left:4px;">Normal</span>
+              <% } else if (bmi < 30) { %>
+                <span style="display:inline-block; padding:2px 12px; border-radius:16px; background:#fef9c3; color:#b45309; font-weight:600; font-size:1.5em; margin-left:4px;">Overweight</span>
+              <% } else { %>
+                <span style="display:inline-block; padding:2px 12px; border-radius:16px; background:#fee2e2; color:#dc2626; font-weight:600; font-size:1.5em; margin-left:4px;">Obese</span>
+              <% } %>
+            </li>
           <% } else { %>
-            <li class="muted">No height data for BMI calculation.</li>
+            <li class="muted" style="margin-bottom:12px;">No height data for BMI calculation.</li>
           <% } %>
         </ul>
       <% } else { %>
         <div class="muted">Not enough data for analysis.</div>
       <% } %>
+      <h3>BMI Categories</h3>
+  <table style="width:100%; max-width:700px; margin-bottom:18px; border-collapse:collapse; border:2px solid #64748b; border-radius:8px; overflow:hidden; margin-left:auto; margin-right:auto; text-align:center;">
+        <thead>
+          <tr style="background:#f1f5f9;">
+            <th style="padding:8px; border:1px solid #e2e8f0;">BMI Range</th>
+            <th style="padding:8px; border:1px solid #e2e8f0;">Category</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background:#e0e7ff;"><td style="padding:8px; border:1px solid #e2e8f0;">Less than 18.5</td><td style="padding:8px; border:1px solid #e2e8f0; color:#1e40af; font-weight:600;">Underweight</td></tr>
+          <tr style="background:#dcfce7;"><td style="padding:8px; border:1px solid #e2e8f0;">18.5 – 24.9</td><td style="padding:8px; border:1px solid #e2e8f0; color:#15803d; font-weight:600;">Normal weight</td></tr>
+          <tr style="background:#fef9c3;"><td style="padding:8px; border:1px solid #e2e8f0;">25 – 29.9</td><td style="padding:8px; border:1px solid #e2e8f0; color:#b45309; font-weight:600;">Overweight</td></tr>
+          <tr style="background:#fee2e2;"><td style="padding:8px; border:1px solid #e2e8f0;">30 or more</td><td style="padding:8px; border:1px solid #e2e8f0; color:#dc2626; font-weight:600;">Obese</td></tr>
+        </tbody>
+      </table>
+      <div class="muted" style="margin-bottom:18px;">BMI (Body Mass Index) is a simple index of weight-for-height that is commonly used to classify underweight, normal weight, overweight, and obesity in adults. <br>Formula: <strong>BMI = weight (kg) / [height (m)]²</strong></div>
+      
     </div>
   </div>
 

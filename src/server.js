@@ -1,12 +1,16 @@
 const express = require('express')
 const configViewEngine = require('./config/viewEngine')
 const connection = require('./config/database')
+
 const webRoutes = require('./routes/web')
 const e = require('express')
 require('dotenv').config()
 const app = express()
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
+
+// Enable method-override for PUT/DELETE in forms
+require('./config/methodOverride')(app)
 
 // Const
 const port = process.env.PORT || 3001

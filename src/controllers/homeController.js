@@ -54,13 +54,13 @@ const getStats = async (req, res) => {
 
 const postAddUser = async (req, res) => {
     console.log('Registering user...')
-    let {email, password, hashedPassword, firstName, lastName, address, city, state, zipcode, deposit } = req.body
+    let {email, password, hashedPassword, firstName, lastName, address, city, state, zipcode, deposit, height_cm } = req.body
     sql = `INSERT INTO 
-        Users (email, password, firstName, lastName, address, city, state, zipcode, balance)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        Users (email, password, firstName, lastName, address, city, state, zipcode, balance, height_cm)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     const [result, fields] = await connection.query(
         sql, 
-        [email, hashedPassword, firstName, lastName, address, city, state, zipcode, deposit ]
+        [email, hashedPassword, firstName, lastName, address, city, state, zipcode, deposit, height_cm ]
     )
     console.log(result)
     res.send(`
@@ -168,6 +168,7 @@ const getWeightTrend = async (req, res) => {
     }
 }
 
+const { putUpdateUser } = require('./putUpdateUser');
 module.exports = {
     getHomePage,
     getLearnMorePage,
@@ -177,5 +178,6 @@ module.exports = {
     getEditUser,
     getUserWeights,
     postUserWeights,
-    getWeightTrend
+    getWeightTrend,
+    putUpdateUser
 }

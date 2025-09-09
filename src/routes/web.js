@@ -14,7 +14,12 @@ const router = express.Router()
 
   router.get('/stats', getStats)
 
+
+  // Edit user form
   router.get('/users/:id/edit', getEditUser)
+
+  // Update user info (PUT)
+  router.put('/users/:id', require('../controllers/homeController').putUpdateUser)
 
   router.get('/users/:id/weights', getUserWeights)
 

@@ -89,6 +89,12 @@
           <input id="balance" name="balance" type="number" step="0.01" min="0" value="<%= (user.balance ?? 0).toString() %>">
           <p class="inline-note">This is the current account balance.</p>
         </div>
+
+          <div>
+            <label for="height_cm">Height (cm)</label>
+            <input id="height_cm" name="height_cm" type="number" step="0.1" min="0" value="<%= user.height_cm || '' %>" placeholder="Enter height in cm (optional)">
+            <p class="inline-note">Optional. You can update your height here.</p>
+          </div>
       </div>
 
       <div style="margin-top:16px; display:flex; gap:10px;">
