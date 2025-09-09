@@ -28,28 +28,76 @@ const getLearnMorePage = (req, res) => {
 }
 
 const getStats = async (req, res) => {
-    let [result, fields] = await connection.query('SELECT * from Users')
-    let totalBalance = 0
-    let accountHasBalance = 0
-    let accountNull
+    // Get all users
+    let [users] = await connection.query('SELECT * from Users');
+    let totalBalance = 0;
+    let accountHasBalance = 0;
+    let accountNull;
 
-    console.log(result)
-    for (i=0; i < result.length; i++){
-        totalBalance += result[i].balance;
-        if (result[i].balance != 0) {
-            accountHasBalance += 1
+    for (let i = 0; i < users.length; i++) {
+        totalBalance += users[i].balance;
+        if (users[i].balance != 0) {
+            accountHasBalance += 1;
         }
     }
-    accountNull = result.length - accountHasBalance
+    accountNull = users.length - accountHasBalance;
+
+    // Get active users (those with at least one weight entry)
+    let [activeUsers] = await connection.query(`
+        SELECT u.id, u.firstName, u.lastName, u.height_cm, COUNT(w.id) as weightCount
+        FROM Users u
+        JOIN UserWeights w ON u.id = w.user_id
+        GROUP BY u.id
+        ORDER BY weightCount DESC
+    `);
+
+    // Get latest weight for each user with height, and calculate BMI
+    let [bmiUsers] = await connection.query(`
+        SELECT u.id, u.firstName, u.lastName, u.height_cm,
+               uw.weight_kg, uw.taken_at_utc
+        FROM Users u
+        JOIN (
+            SELECT user_id, MAX(taken_at_utc) as max_time
+            FROM UserWeights
+            GROUP BY user_id
+        ) latest ON u.id = latest.user_id
+        JOIN UserWeights uw ON uw.user_id = latest.user_id AND uw.taken_at_utc = latest.max_time
+        WHERE u.height_cm IS NOT NULL AND u.height_cm > 0
+    `);
+
+    // Calculate BMI, BMI category, and filter for 'good health' (BMI 18.5-24.9)
+    let bmiRanking = bmiUsers.map(u => {
+        const heightM = u.height_cm / 100;
+        const bmi = u.weight_kg / (heightM * heightM);
+        let category = '';
+        if (bmi < 18.5) category = 'Underweight';
+        else if (bmi < 25) category = 'Normal';
+        else if (bmi < 30) category = 'Overweight';
+        else category = 'Obese';
+        return {
+            id: u.id,
+            name: `${u.firstName} ${u.lastName}`,
+            bmi: parseFloat(bmi.toFixed(2)),
+            weight: u.weight_kg,
+            date: u.taken_at_utc,
+            category
+        };
+    });
+    // Sort by BMI closest to 22 (ideal BMI), then take top 5
+    bmiRanking.sort((a, b) => Math.abs(a.bmi - 22) - Math.abs(b.bmi - 22));
+    let goodHealthRanking = bmiRanking.slice(0, 5);
+
     res.render('stats.ejs', {
-            pageTitle: 'About',
-            headerTitle: 'Dashboard',
-            author: "Admin",
-            totalBalance: totalBalance,
-            accountHasBalance: accountHasBalance,
-            accountNull: accountNull,
-            totalAccount: result.length
-        });
+        pageTitle: 'About',
+        headerTitle: 'Dashboard',
+        author: "Admin",
+        totalBalance: totalBalance,
+        accountHasBalance: accountHasBalance,
+        accountNull: accountNull,
+        totalAccount: users.length,
+        activeUsers: activeUsers,
+        goodHealthRanking: goodHealthRanking
+    });
 }
 
 const postAddUser = async (req, res) => {
@@ -186,7 +234,7 @@ const getWeightTrend = async (req, res) => {
                     const heightM = user.height_cm / 100;
                     const bmi = latestWeight / (heightM * heightM);
                     const age = user.age || 30; // fallback
-                    const sex = user.sex === 'female' ? 0 : 1; // fallback to male
+                    const sex = user.gender === 'female' ? 0 : 1; // fallback to male
                     bodyFatEstimate = (1.20 * bmi + 0.23 * age - 10.8 * sex - 5.4).toFixed(1);
                     bodyFatMethod = 'BMI-based (Deurenberg formula, est. adult)';
                 }

@@ -48,6 +48,71 @@
             </div>
         </section>
 
+        <!-- Active Users List -->
+        <section style="margin: 2rem 0;">
+            <h2>Active Users (with weight records)</h2>
+            <% if (activeUsers && activeUsers.length) { %>
+                <table style="width:100%; max-width:700px; margin:auto; border-collapse:collapse; border:1px solid #e2e8f0;">
+                    <thead>
+                        <tr style="background:#f1f5f9;">
+                            <th style="padding:8px; border:1px solid #e2e8f0;">Name</th>
+                            <th style="padding:8px; border:1px solid #e2e8f0;"># Weights</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% activeUsers.forEach(u => { %>
+                            <tr>
+                                <td style="padding:8px; border:1px solid #e2e8f0;"><%= u.firstName %> <%= u.lastName %></td>
+                                <td style="padding:8px; border:1px solid #e2e8f0; text-align:center;"><%= u.weightCount %></td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            <% } else { %>
+                <div style="color:#64748b;">No active users found.</div>
+            <% } %>
+        </section>
+
+        <!-- Good Health BMI Ranking Chart -->
+        <section style="margin: 2rem 0;">
+                        <h2>Ranking: Top 5 Users by BMI (All Categories)</h2>
+                                    <% if (goodHealthRanking && goodHealthRanking.length) { %>
+                                            <canvas id="bmiRankingChart" height="320"></canvas>
+                                            <table style="width:100%; max-width:700px; margin:18px auto 0 auto; border-collapse:collapse; border:1px solid #e2e8f0;">
+                                                <thead>
+                                                    <tr style="background:#f1f5f9;">
+                                                        <th style="padding:8px; border:1px solid #e2e8f0;">Rank</th>
+                                                        <th style="padding:8px; border:1px solid #e2e8f0;">Name</th>
+                                                        <th style="padding:8px; border:1px solid #e2e8f0;">BMI</th>
+                                                        <th style="padding:8px; border:1px solid #e2e8f0;">Category</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <% goodHealthRanking.forEach((u, idx) => { %>
+                                                        <tr>
+                                                            <td style="padding:8px; border:1px solid #e2e8f0; text-align:center;"><%= idx+1 %></td>
+                                                            <td style="padding:8px; border:1px solid #e2e8f0;"><%= u.name %></td>
+                                                            <td style="padding:8px; border:1px solid #e2e8f0; text-align:center;"><%= u.bmi %></td>
+                                                            <td style="padding:8px; border:1px solid #e2e8f0; text-align:center;">
+                                                                <% if (u.category === 'Underweight') { %>
+                                                                    <span style="display:inline-block; padding:2px 12px; border-radius:16px; background:#e0e7ff; color:#1e40af; font-weight:600;">Underweight</span>
+                                                                <% } else if (u.category === 'Normal') { %>
+                                                                    <span style="display:inline-block; padding:2px 12px; border-radius:16px; background:#dcfce7; color:#15803d; font-weight:600;">Normal</span>
+                                                                <% } else if (u.category === 'Overweight') { %>
+                                                                    <span style="display:inline-block; padding:2px 12px; border-radius:16px; background:#fef9c3; color:#b45309; font-weight:600;">Overweight</span>
+                                                                <% } else { %>
+                                                                    <span style="display:inline-block; padding:2px 12px; border-radius:16px; background:#fee2e2; color:#dc2626; font-weight:600;">Obese</span>
+                                                                <% } %>
+                                                            </td>
+                                                        </tr>
+                                                    <% }) %>
+                                                </tbody>
+                                            </table>
+                                    <% } else { %>
+                                            <div style="color:#64748b;">No users found for ranking.</div>
+                                    <% } %>
+        </section>
+
         <!-- Chart.js CDN -->
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         
@@ -91,6 +156,46 @@
                 }
             }
             });
+
+            // BMI Ranking Chart (Good Health)
+            const bmiRankingLabels = JSON.parse('<%- JSON.stringify(goodHealthRanking.map(u => u.name)) %>');
+            const bmiRankingData = JSON.parse('<%- JSON.stringify(goodHealthRanking.map(u => u.bmi)) %>');
+            if (bmiRankingData && bmiRankingData.length) {
+                new Chart(document.getElementById('bmiRankingChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: bmiRankingLabels,
+                        datasets: [{
+                            label: 'BMI',
+                            data: bmiRankingData,
+                            backgroundColor: 'rgba(34,197,94,0.7)',
+                            borderColor: 'rgba(21,128,61,1)',
+                            borderWidth: 2,
+                            barThickness: 70
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        scales: {
+                            x: {
+                                min: 15,
+                                max: 40,
+                                title: { display: true, text: 'BMI' }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return 'BMI: ' + context.parsed.x;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
         </script>
     </main>
     <footer>
