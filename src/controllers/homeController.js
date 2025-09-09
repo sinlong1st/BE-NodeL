@@ -150,18 +150,27 @@ const getWeightTrend = async (req, res) => {
         if (!user) {
             return res.status(404).send('User not found');
         }
-        // Query all weights for the user (patient) by id
-        const [weights] = await connection.query(
-            'SELECT * FROM UserWeights WHERE user_id = ? ORDER BY taken_at_utc ASC',
-            [userId]
-        );
-        res.render('weightTrend.ejs', {
-            pageTitle: 'Weight Trend',
-            headerTitle: 'Dashboard',
-            author: 'Admin',
-            user: user,
-            weights: weights
-        });
+                // Query only the latest weight per day for the user
+                const [weights] = await connection.query(
+                        `SELECT uw.* FROM UserWeights uw
+                         INNER JOIN (
+                             SELECT DATE(taken_at_utc) as day, MAX(taken_at_utc) as max_time
+                             FROM UserWeights
+                             WHERE user_id = ?
+                             GROUP BY day
+                         ) latest
+                         ON DATE(uw.taken_at_utc) = latest.day AND uw.taken_at_utc = latest.max_time
+                         WHERE uw.user_id = ?
+                         ORDER BY uw.taken_at_utc ASC`,
+                        [userId, userId]
+                );
+                res.render('weightTrend.ejs', {
+                        pageTitle: 'Weight Trend',
+                        headerTitle: 'Dashboard',
+                        author: 'Admin',
+                        user: user,
+                        weights: weights
+                });
     } catch (err) {
         console.error('Error fetching weight trend:', err);
         res.status(500).send('Error fetching weight trend');

@@ -79,13 +79,24 @@
   </div>
 
   <script>
-    var labels = <%- JSON.stringify(weights.map(w => new Date(w.taken_at_utc).toLocaleDateString())) %>;
-    var data = <%- JSON.stringify(weights.map(w => w.weight_kg)) %>;
+  var labels = <%- JSON.stringify(weights.map(w => {
+    const d = new Date(w.taken_at_utc);
+    return d.toLocaleDateString();
+  })) %>;
+  var data = <%- JSON.stringify(weights.map(w => w.weight_kg)) %>;
+  var datetimes = <%- JSON.stringify(weights.map(w => {
+    const d = new Date(w.taken_at_utc);
+    return d.toLocaleString();
+  })) %>;
+  var minY = Math.min.apply(null, data);
+  var maxY = Math.max.apply(null, data);
+  minY = Math.floor(minY - 2); // Set y-axis min a bit below the lowest weight
+  maxY = Math.ceil(maxY + 2);  // Set y-axis max a bit above the highest weight
   </script>
   <script>
     if (labels.length > 0) {
       const ctx = document.getElementById('weightChart').getContext('2d');
-      new Chart(ctx, {
+  new Chart(ctx, {
         type: 'line',
         data: {
           labels: labels,
@@ -106,11 +117,19 @@
           responsive: true,
           plugins: {
             legend: { display: true },
-            title: { display: false }
+            title: { display: false },
+            tooltip: {
+              callbacks: {
+                title: function(context) {
+                  // context[0].dataIndex gives the index in the data array
+                  return datetimes[context[0].dataIndex];
+                }
+              }
+            }
           },
           scales: {
             x: { title: { display: true, text: 'Date' } },
-            y: { title: { display: true, text: 'Weight (kg)' }, beginAtZero: false }
+            y: { title: { display: true, text: 'Weight (kg)' }, beginAtZero: false, min: minY, max: maxY }
           }
         }
       });
