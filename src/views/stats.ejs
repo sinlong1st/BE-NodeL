@@ -75,42 +75,62 @@
 
         <!-- Good Health BMI Ranking Chart -->
         <section style="margin: 2rem 0;">
-                        <h2>Ranking: Top 5 Users by BMI (All Categories)</h2>
-                                    <% if (goodHealthRanking && goodHealthRanking.length) { %>
-                                            <canvas id="bmiRankingChart" height="320"></canvas>
-                                            <table style="width:100%; max-width:700px; margin:18px auto 0 auto; border-collapse:collapse; border:1px solid #e2e8f0;">
-                                                <thead>
-                                                    <tr style="background:#f1f5f9;">
-                                                        <th style="padding:8px; border:1px solid #e2e8f0;">Rank</th>
-                                                        <th style="padding:8px; border:1px solid #e2e8f0;">Name</th>
-                                                        <th style="padding:8px; border:1px solid #e2e8f0;">BMI</th>
-                                                        <th style="padding:8px; border:1px solid #e2e8f0;">Category</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <% goodHealthRanking.forEach((u, idx) => { %>
-                                                        <tr>
-                                                            <td style="padding:8px; border:1px solid #e2e8f0; text-align:center;"><%= idx+1 %></td>
-                                                            <td style="padding:8px; border:1px solid #e2e8f0;"><%= u.name %></td>
-                                                            <td style="padding:8px; border:1px solid #e2e8f0; text-align:center;"><%= u.bmi %></td>
-                                                            <td style="padding:8px; border:1px solid #e2e8f0; text-align:center;">
-                                                                <% if (u.category === 'Underweight') { %>
-                                                                    <span style="display:inline-block; padding:2px 12px; border-radius:16px; background:#e0e7ff; color:#1e40af; font-weight:600;">Underweight</span>
-                                                                <% } else if (u.category === 'Normal') { %>
-                                                                    <span style="display:inline-block; padding:2px 12px; border-radius:16px; background:#dcfce7; color:#15803d; font-weight:600;">Normal</span>
-                                                                <% } else if (u.category === 'Overweight') { %>
-                                                                    <span style="display:inline-block; padding:2px 12px; border-radius:16px; background:#fef9c3; color:#b45309; font-weight:600;">Overweight</span>
-                                                                <% } else { %>
-                                                                    <span style="display:inline-block; padding:2px 12px; border-radius:16px; background:#fee2e2; color:#dc2626; font-weight:600;">Obese</span>
-                                                                <% } %>
-                                                            </td>
-                                                        </tr>
-                                                    <% }) %>
-                                                </tbody>
-                                            </table>
-                                    <% } else { %>
-                                            <div style="color:#64748b;">No users found for ranking.</div>
-                                    <% } %>
+                <h2>Ranking: Top 5 Users by BMI (All Categories)</h2>
+                    <% let bmiRankingColors = [], bmiRankingBorders = [];
+                            if (goodHealthRanking && goodHealthRanking.length) { 
+                                bmiRankingColors = goodHealthRanking.map(u => {
+                                    if (u.category === 'Underweight') return '#e0e7ff';
+                                    if (u.category === 'Normal') return '#dcfce7';
+                                    if (u.category === 'Overweight') return '#fef9c3';
+                                    return '#fee2e2';
+                                });
+                                bmiRankingBorders = goodHealthRanking.map(u => {
+                                    if (u.category === 'Underweight') return '#1e40af';
+                                    if (u.category === 'Normal') return '#15803d';
+                                    if (u.category === 'Overweight') return '#b45309';
+                                    return '#dc2626';
+                                });
+                    %>
+                                <div style="max-width:480px; margin:0 auto;">
+                                    <canvas id="bmiRankingChart" height="180" style="max-width:100%;"></canvas>
+                                </div>
+                <table style="width:100%; max-width:700px; margin:18px auto 0 auto; border-collapse:collapse; border:1px solid #e2e8f0;">
+                                <div style="max-width:700px; margin:18px auto 0 auto; color:#64748b; font-size:1em; background:#f8fafc; border-radius:8px; padding:12px 18px;">
+                                    <strong>How is this ranking calculated?</strong><br>
+                                    The top 5 users are ranked by how close their latest BMI is to 22 (the middle of the 'Normal' BMI range). All BMI categories are included. Bar and tag colors match the BMI category: <span style="color:#1e40af;">Underweight</span>, <span style="color:#15803d;">Normal</span>, <span style="color:#b45309;">Overweight</span>, <span style="color:#dc2626;">Obese</span>.
+                                </div>
+                    <thead>
+                        <tr style="background:#f1f5f9;">
+                            <th style="padding:8px; border:1px solid #e2e8f0;">Rank</th>
+                            <th style="padding:8px; border:1px solid #e2e8f0;">Name</th>
+                            <th style="padding:8px; border:1px solid #e2e8f0;">BMI</th>
+                            <th style="padding:8px; border:1px solid #e2e8f0;">Category</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <% goodHealthRanking.forEach((u, idx) => { %>
+                        <tr>
+                            <td style="padding:8px; border:1px solid #e2e8f0; text-align:center;"><%= idx+1 %></td>
+                            <td style="padding:8px; border:1px solid #e2e8f0; font-weight:bold;"><a href="/users/<%= u.id %>/weights"><%= u.name %></a></td>
+                            <td style="padding:8px; border:1px solid #e2e8f0; text-align:center;"><%= u.bmi %></td>
+                            <td style="padding:8px; border:1px solid #e2e8f0; text-align:center;">
+                                <% if (u.category === 'Underweight') { %>
+                                    <span style="display:inline-block; padding:2px 12px; border-radius:16px; background:#e0e7ff; color:#1e40af; font-weight:600;">Underweight</span>
+                                <% } else if (u.category === 'Normal') { %>
+                                    <span style="display:inline-block; padding:2px 12px; border-radius:16px; background:#dcfce7; color:#15803d; font-weight:600;">Normal</span>
+                                <% } else if (u.category === 'Overweight') { %>
+                                    <span style="display:inline-block; padding:2px 12px; border-radius:16px; background:#fef9c3; color:#b45309; font-weight:600;">Overweight</span>
+                                <% } else { %>
+                                    <span style="display:inline-block; padding:2px 12px; border-radius:16px; background:#fee2e2; color:#dc2626; font-weight:600;">Obese</span>
+                                <% } %>
+                            </td>
+                        </tr>
+                    <% }) %>
+                    </tbody>
+                </table>
+<% } else { %>
+        <div style="color:#64748b;">No users found for ranking.</div>
+<% } %>
         </section>
 
         <!-- Chart.js CDN -->
@@ -157,9 +177,11 @@
             }
             });
 
-            // BMI Ranking Chart (Good Health)
+            // BMI Ranking Chart
             const bmiRankingLabels = JSON.parse('<%- JSON.stringify(goodHealthRanking.map(u => u.name)) %>');
             const bmiRankingData = JSON.parse('<%- JSON.stringify(goodHealthRanking.map(u => u.bmi)) %>');
+            const bmiRankingColors = JSON.parse('<%- JSON.stringify(bmiRankingColors) %>');
+            const bmiRankingBorders = JSON.parse('<%- JSON.stringify(bmiRankingBorders) %>');
             if (bmiRankingData && bmiRankingData.length) {
                 new Chart(document.getElementById('bmiRankingChart'), {
                     type: 'bar',
@@ -168,10 +190,10 @@
                         datasets: [{
                             label: 'BMI',
                             data: bmiRankingData,
-                            backgroundColor: 'rgba(34,197,94,0.7)',
-                            borderColor: 'rgba(21,128,61,1)',
+                            backgroundColor: bmiRankingColors,
+                            borderColor: bmiRankingBorders,
                             borderWidth: 2,
-                            barThickness: 70
+                            barThickness: 25
                         }]
                     },
                     options: {
