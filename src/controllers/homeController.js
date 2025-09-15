@@ -132,6 +132,26 @@ const getEditUser = async (req, res) => {
     const userId = req.params.id; 
     let [result, fields] = await connection.query(`SELECT * from Users where id = ${userId}`)
 
+    let user = result && result.length > 0 ? result[0] : null;
+    if (!user) {
+        return res.status(404).render('userNotFound.ejs', {
+            pageTitle: 'User Not Found',
+            headerTitle: 'Dashboard',
+            author: "Admin"
+        });
+    }
+    res.render('editUser.ejs', {
+        pageTitle: 'Edit User',
+        headerTitle: 'Dashboard',
+        author: "Admin",
+        user: user
+    });
+}
+
+const getEditUser2 = async (req, res) => {
+    const userId = req.params.id; 
+    let [result, fields] = await connection.query(`SELECT * from Users where id = ?`, [userId])
+
     res.render('editUser.ejs', {
             pageTitle: 'Edit User',
             headerTitle: 'Dashboard',
