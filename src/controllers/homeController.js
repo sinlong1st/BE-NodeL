@@ -1,4 +1,5 @@
 const connection = require('../config/database')
+const { getUserById } = require('../services/CRUDService');
 
 const getHomePage = async (req, res) => {
     users = []
@@ -130,9 +131,7 @@ const getAbout = (req, res) => {
 
 const getEditUser = async (req, res) => {
     const userId = req.params.id; 
-    let [result, fields] = await connection.query(`SELECT * from Users where id = ${userId}`)
-
-    let user = result && result.length > 0 ? result[0] : null;
+    const user = await getUserById(userId);
     if (!user) {
         return res.status(404).render('userNotFound.ejs', {
             pageTitle: 'User Not Found',
@@ -148,17 +147,6 @@ const getEditUser = async (req, res) => {
     });
 }
 
-const getEditUser2 = async (req, res) => {
-    const userId = req.params.id; 
-    let [result, fields] = await connection.query(`SELECT * from Users where id = ?`, [userId])
-
-    res.render('editUser.ejs', {
-            pageTitle: 'Edit User',
-            headerTitle: 'Dashboard',
-            author: "Admin",
-            user: result[0]
-        });
-}
 
 const getUserWeights = async (req, res) => {
     const userId = req.params.id;
