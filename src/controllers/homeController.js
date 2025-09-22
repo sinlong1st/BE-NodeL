@@ -236,6 +236,9 @@ const getWeightTrend = async (req, res) => {
                 // Body composition proxy: estimate body fat % (BMI-based, for adults)
                 let bodyFatEstimate = null;
                 let bodyFatMethod = null;
+                // Latest BMI and category for this user (numeric)
+                let latestBMI = null;
+                let userBmiCategory = null;
                 if (user && user.height_cm && weights.length > 0) {
                     // BMI method (Deurenberg formula, for adults)
                     // BF% = 1.20 * BMI + 0.23 * age - 10.8 * sex - 5.4
@@ -248,6 +251,12 @@ const getWeightTrend = async (req, res) => {
                     const sex = user.gender === 'female' ? 0 : 1; // fallback to male
                     bodyFatEstimate = (1.20 * bmi + 0.23 * age - 10.8 * sex - 5.4).toFixed(1);
                     bodyFatMethod = 'BMI-based (Deurenberg formula, est. adult)';
+                    // store numeric latest BMI and category
+                    latestBMI = parseFloat(bmi.toFixed(2));
+                    if (latestBMI < 18.5) userBmiCategory = 'Underweight';
+                    else if (latestBMI < 25) userBmiCategory = 'Normal';
+                    else if (latestBMI < 30) userBmiCategory = 'Overweight';
+                    else userBmiCategory = 'Obese';
                 }
 
                 res.render('weightTrend.ejs', {
@@ -259,7 +268,9 @@ const getWeightTrend = async (req, res) => {
                                 chartLabels,
                                 chartDatetimes,
                                 bodyFatEstimate,
-                                bodyFatMethod
+                                bodyFatMethod,
+                                latestBMI,
+                                userBmiCategory
                 });
     } catch (err) {
         console.error('Error fetching weight trend:', err);

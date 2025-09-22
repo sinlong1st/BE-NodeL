@@ -65,6 +65,18 @@
             <li class="muted" style="margin-bottom:12px;">No height data for BMI calculation.</li>
           <% } %>
         </ul>
+
+        <% if (typeof latestBMI !== 'undefined' && latestBMI !== null) { %>
+          <div style="margin-top:18px; max-width:720px;">
+            <strong>BMI Scale</strong>
+            <div class="muted" style="font-size:0.95em; margin-bottom:8px;">The bar shows BMI categories across a 12–40 range; the triangle marks your latest BMI.</div>
+            <div id="bmi-scale" style="position:relative; height:28px; border-radius:8px; overflow:hidden; background:#f1f5f9;"></div>
+            <div style="position:relative; height:0; margin-top:6px;">
+              <div id="bmi-triangle" style="position:absolute; top:-18px; width:0; height:0; border-left:9px solid transparent; border-right:9px solid transparent; border-bottom:14px solid #000; transform:translateX(-50%);"></div>
+            </div>
+            <div style="margin-top:10px; display:flex; gap:12px; align-items:center;"><div style="font-weight:700;">Your BMI:</div><div id="bmi-value" style="color:#0ea5e9; font-weight:700;"></div><div id="bmi-cat" class="muted"></div></div>
+          </div>
+        <% } %>
       <% } else { %>
         <div class="muted">Not enough data for analysis.</div>
       <% } %>
@@ -89,13 +101,67 @@
   </div>
 
   <script>
-  var labels = <%- JSON.stringify(chartLabels) %>;
-  var data = <%- JSON.stringify(weights.map(w => w.weight_kg)) %>;
-  var datetimes = <%- JSON.stringify(chartDatetimes) %>;
+  var labels = JSON.parse('<%- JSON.stringify(chartLabels || []) %>');
+  var data = JSON.parse('<%- JSON.stringify((weights || []).map(function(w){ return w.weight_kg; })) %>');
+  var datetimes = JSON.parse('<%- JSON.stringify(chartDatetimes || []) %>');
   var minY = Math.min.apply(null, data);
   var maxY = Math.max.apply(null, data);
   minY = Math.floor(minY - 2); // Set y-axis min a bit below the lowest weight
   maxY = Math.ceil(maxY + 2);  // Set y-axis max a bit above the highest weight
+  </script>
+  <script>
+    // Safe parse of latestBMI and category
+    var latestBMI = JSON.parse('<%- JSON.stringify(typeof latestBMI !== "undefined" ? latestBMI : null) %>');
+    var userBmiCategory = JSON.parse('<%- JSON.stringify(typeof userBmiCategory !== "undefined" ? userBmiCategory : null) %>');
+
+    // BMI thresholds and their colors
+    var thresholds = [12, 18.5, 25, 30, 40]; // min, underweight end, normal end, overweight end, max
+    var colors = ['#e0e7ff', '#dcfce7', '#fef9c3', '#fee2e2'];
+
+    function renderBmiScale() {
+      var container = document.getElementById('bmi-scale');
+      if (!container) return;
+      // Compute segment widths proportionally across thresholds
+      var min = thresholds[0], max = thresholds[4];
+      container.innerHTML = '';
+      for (var i = 0; i < 4; i++) {
+        var segMin = thresholds[i];
+        var segMax = thresholds[i+1];
+        var widthPct = ((segMax - segMin) / (max - min)) * 100;
+        var seg = document.createElement('div');
+        seg.style.width = widthPct + '%';
+        seg.style.height = '100%';
+        seg.style.display = 'inline-block';
+        seg.style.background = colors[i];
+        container.appendChild(seg);
+      }
+      // position triangle
+      var tri = document.getElementById('bmi-triangle');
+      var valueEl = document.getElementById('bmi-value');
+      var catEl = document.getElementById('bmi-cat');
+      if (latestBMI !== null && tri) {
+        var pct = ((Math.max(min, Math.min(max, latestBMI)) - min) / (max - min)) * 100;
+        // place triangle relative to container width
+        // container may not have explicit width; use offsetWidth
+        var containerRect = container.getBoundingClientRect();
+        var left = (pct / 100) * containerRect.width;
+        tri.style.left = left + 'px';
+        tri.style.borderBottomColor = (function(cat){
+          if (!cat) return '#000';
+          if (cat === 'Underweight') return '#1e40af';
+          if (cat === 'Normal') return '#15803d';
+          if (cat === 'Overweight') return '#b45309';
+          if (cat === 'Obese') return '#dc2626';
+          return '#000';
+        })(userBmiCategory);
+        if (valueEl) valueEl.textContent = latestBMI;
+        if (catEl) catEl.textContent = userBmiCategory ? '(' + userBmiCategory + ')' : '';
+      }
+    }
+
+    // render after load and on resize
+    window.addEventListener('load', renderBmiScale);
+    window.addEventListener('resize', function(){ setTimeout(renderBmiScale, 60); });
   </script>
   <script>
     if (labels.length > 0) {
