@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tank Shooting Game</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Tank Shooting Game</h1>
+  <canvas id="game" width="600" height="400"></canvas>
+  <div class="info">
+    <span id="scoreLabel">Score: 0</span>
+    <span id="ammoLabel"> | Ammo: 10</span>
+  </div>
+  <div class="instructions">
+    <p>Move your mouse to control the tank. Click or press <b>Space</b> to shoot!</p>
+  </div>
+  <button id="restartBtn" style="display:none;">Restart</button>
+  <div id="gameOverMsg" class="game-over"></div>
+  <script src="game.js"></script>
+</body>
+</html>

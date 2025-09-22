@@ -1,7 +1,7 @@
 const express = require('express')
 const {getHomePage, getLearnMorePage, postAddUser, 
   getAbout, getStats, getEditUser, getUserWeights,
-  postUserWeights, getWeightTrend} = require('../controllers/homeController')
+  postUserWeights, getWeightTrend, postUpdateUser} = require('../controllers/homeController')
 const router = express.Router()
   
   router.get('/', getHomePage)
@@ -19,7 +19,9 @@ const router = express.Router()
   router.get('/users/:id/edit', getEditUser)
 
   // Update user info (PUT)
-  router.put('/users/:id', require('../controllers/homeController').putUpdateUser)
+  // router.put('/users/:id', require('../controllers/homeController').putUpdateUser)
+
+  router.post('/users/:id/edit', postUpdateUser)
 
   router.get('/users/:id/weights', getUserWeights)
 

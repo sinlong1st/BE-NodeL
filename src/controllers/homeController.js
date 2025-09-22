@@ -1,5 +1,5 @@
 const connection = require('../config/database')
-const { getUserById } = require('../services/CRUDService');
+const { getUserById, updateUserById } = require('../services/CRUDService');
 
 const getHomePage = async (req, res) => {
     users = []
@@ -132,6 +132,7 @@ const getAbout = (req, res) => {
 const getEditUser = async (req, res) => {
     const userId = req.params.id; 
     const user = await getUserById(userId);
+    const { success, error } = req.query;
     if (!user) {
         return res.status(404).render('userNotFound.ejs', {
             pageTitle: 'User Not Found',
@@ -143,7 +144,9 @@ const getEditUser = async (req, res) => {
         pageTitle: 'Edit User',
         headerTitle: 'Dashboard',
         author: "Admin",
-        user: user
+        user: user,
+        success,
+        error
     });
 }
 
@@ -264,6 +267,19 @@ const getWeightTrend = async (req, res) => {
     }
 }
 
+const postUpdateUser = async (req, res) => {
+    const userId = req.params.id;
+    const { email, firstName, lastName, address, city, state, zipcode, balance, height_cm } = req.body;
+    try {
+        await updateUserById(userId, email, firstName, lastName, address, city, state, zipcode, balance, height_cm);
+        console.log(`User ${userId} updated successfully.`);
+        return res.redirect(`/users/${userId}/edit?success=1`);
+    } catch (err) {
+        console.error(`Failed to update user ${userId}:`, err);
+        return res.redirect(`/users/${userId}/edit?error=1`);
+    }
+}
+
 const { putUpdateUser } = require('./putUpdateUser');
 module.exports = {
     getHomePage,
@@ -275,5 +291,6 @@ module.exports = {
     getUserWeights,
     postUserWeights,
     getWeightTrend,
-    putUpdateUser
+    putUpdateUser,
+    postUpdateUser
 }
