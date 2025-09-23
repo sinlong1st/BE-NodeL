@@ -67,8 +67,9 @@
         </ul>
 
         <% if (typeof latestBMI !== 'undefined' && latestBMI !== null) { %>
+          <h3>BMI Scale</h3>
           <div style="margin-top:18px; max-width:720px;">
-            <strong>BMI Scale</strong>
+            
             <div class="muted" style="font-size:0.95em; margin-bottom:8px;">The bar shows BMI categories across a 12–40 range; the triangle marks your latest BMI.</div>
             <div id="bmi-scale" style="position:relative; height:28px; border-radius:8px; overflow:hidden; background:#f1f5f9;"></div>
             <div style="position:relative; height:0; margin-top:6px;">
@@ -77,6 +78,54 @@
             <div style="margin-top:10px; display:flex; gap:12px; align-items:center;"><div style="font-weight:700;">Your BMI:</div><div id="bmi-value" style="color:#0ea5e9; font-weight:700;"></div><div id="bmi-cat" class="muted"></div></div>
           </div>
         <% } %>
+        
+        <!-- Goal: show weight targets to reach Normal BMI range -->
+        <% if (user && user.height_cm && weights && weights.length > 0) {
+             const latestWeight = parseFloat(weights[weights.length-1].weight_kg);
+             const heightM = user.height_cm / 100;
+             const minNormalWeight = 18.5 * heightM * heightM;
+             const maxNormalWeight = 24.9 * heightM * heightM;
+             const idealWeight = 22 * heightM * heightM;
+             const needToLose = latestWeight - maxNormalWeight;
+             const needToGain = minNormalWeight - latestWeight;
+        %>
+        <h3>Goal</h3>
+          <div style="margin-top:18px; max-width:720px; background:#fff; padding:12px; border-radius:10px; box-shadow:0 6px 18px rgba(2,6,23,0.04);">
+            
+            <% if (needToLose > 0) { %>
+              <div><strong>To reach the Normal BMI range (≤ 24.9):</strong> you should lose <strong><%= needToLose.toFixed(2) %> kg</strong> to reach <strong><%= maxNormalWeight.toFixed(2) %> kg</strong>.</div>
+              <div class="muted" style="margin-top:6px;">Ideal midpoint target (BMI 22): <strong><%= idealWeight.toFixed(2) %> kg</strong> — you'll need to lose <strong><%= (latestWeight - idealWeight).toFixed(2) %> kg</strong>.</div>
+            <% } else if (needToGain > 0) { %>
+              <div><strong>To reach the Normal BMI range (≥ 18.5):</strong> you should gain <strong><%= needToGain.toFixed(2) %> kg</strong> to reach <strong><%= minNormalWeight.toFixed(2) %> kg</strong>.</div>
+              <div class="muted" style="margin-top:6px;">Ideal midpoint target (BMI 22): <strong><%= idealWeight.toFixed(2) %> kg</strong> — you'll need to gain <strong><%= (idealWeight - latestWeight).toFixed(2) %> kg</strong>.</div>
+            <% } else { %>
+              <div><strong>You're in the Normal BMI range.</strong></div>
+              <div class="muted" style="margin-top:6px;">Current weight: <strong><%= latestWeight.toFixed(2) %> kg</strong>. To reach an ideal BMI of 22 aim for <strong><%= idealWeight.toFixed(2) %> kg</strong> (<strong><%= (idealWeight - latestWeight).toFixed(2) %> kg</strong> change).</div>
+            <% } %>
+            <div style="margin-top:10px; font-size:0.95em; color:#64748b;">These targets are guidance only; consider consulting a clinician for personalized goals.</div>
+          </div>
+        <% } %>
+          <% if (user && user.height_cm) { %>
+            <h3>General Advice</h3>
+            <div style="margin-top:14px; max-width:720px; background:#fff; padding:12px; border-radius:10px; box-shadow:0 6px 18px rgba(2,6,23,0.04);">
+              <ul style="margin:0; padding-left:18px;">
+                <li style="margin-bottom:8px;"><strong>Calories:</strong> To lose ~0.5 kg/week aim for ~500 kcal/day deficit; to gain ~0.5 kg/week aim for ~+500 kcal/day surplus. Adjust based on progress.</li>
+                <% if (weights && weights.length > 0) {
+                     const latestW = parseFloat(weights[weights.length-1].weight_kg);
+                     const proteinMin = Math.round(latestW * 1.2);
+                     const proteinMax = Math.round(latestW * 1.8);
+                %>
+                  <li style="margin-bottom:8px;"><strong>Protein:</strong> Aim for <strong><%= proteinMin %>–<%= proteinMax %> g/day</strong> (~1.2–1.8 g/kg of your current weight <%= latestW.toFixed(1) %> kg) to support muscle mass.</li>
+                <% } else { %>
+                  <li style="margin-bottom:8px;"><strong>Protein:</strong> Consume ~1.2–1.8 g/kg body weight/day to support muscle mass (higher during weight loss or strength training).</li>
+                <% } %>
+                <li style="margin-bottom:8px;"><strong>Exercise:</strong> Combine resistance training (2–3x/week) with 150+ minutes/week moderate cardio. Strength training helps preserve/build muscle during weight change.</li>
+                <li style="margin-bottom:8px;"><strong>Food choices:</strong> Favor whole foods: lean protein, vegetables, whole grains, healthy fats; limit sugary drinks and heavily processed snacks.</li>
+                <li style="margin-bottom:8px;"><strong>Hydration & sleep:</strong> Aim for 7–9 hours sleep and regular hydration — both support recovery and appetite regulation.</li>
+              </ul>
+              <div class="muted" style="margin-top:8px; font-size:0.9em;">These are general suggestions. For personalized plans, allergies, medical conditions, or major weight changes consult a registered dietitian or healthcare provider.</div>
+            </div>
+          <% } %>
       <% } else { %>
         <div class="muted">Not enough data for analysis.</div>
       <% } %>
