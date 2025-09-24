@@ -82,15 +82,34 @@
         <!-- Goal: show weight targets to reach Normal BMI range -->
         <% if (user && user.height_cm && weights && weights.length > 0) {
              const latestWeight = parseFloat(weights[weights.length-1].weight_kg);
+             const startingWeight = parseFloat(weights[0].weight_kg);
              const heightM = user.height_cm / 100;
              const minNormalWeight = 18.5 * heightM * heightM;
              const maxNormalWeight = 24.9 * heightM * heightM;
              const idealWeight = 22 * heightM * heightM;
              const needToLose = latestWeight - maxNormalWeight;
              const needToGain = minNormalWeight - latestWeight;
+             let targetWeight;
+             if (needToLose > 0) targetWeight = maxNormalWeight;
+             else if (needToGain > 0) targetWeight = minNormalWeight;
+             else targetWeight = idealWeight;
+             let progress = 0;
+             if (startingWeight === targetWeight) progress = 100;
+             else {
+               if (startingWeight > targetWeight) {
+                 // loss goal
+                 progress = ((startingWeight - latestWeight) / (startingWeight - targetWeight)) * 100;
+               } else {
+                 // gain goal
+                 progress = ((latestWeight - startingWeight) / (targetWeight - startingWeight)) * 100;
+               }
+             }
+             if (!isFinite(progress) || progress < 0) progress = 0;
+             if (progress > 100) progress = 100;
+      const progressStr = progress.toFixed(0) + '%';
         %>
         <h3>Goal</h3>
-          <div style="margin-top:18px; max-width:720px; background:#fff; padding:12px; border-radius:10px; box-shadow:0 6px 18px rgba(2,6,23,0.04);">
+          <div style="margin-top:18px; max-width:720px; background:#f3f4f6; padding:12px; border-radius:10px; box-shadow:0 6px 18px rgba(2,6,23,0.04);">
             
             <% if (needToLose > 0) { %>
               <div><strong>To reach the Normal BMI range (≤ 24.9):</strong> you should lose <strong><%= needToLose.toFixed(2) %> kg</strong> to reach <strong><%= maxNormalWeight.toFixed(2) %> kg</strong>.</div>
@@ -102,6 +121,12 @@
               <div><strong>You're in the Normal BMI range.</strong></div>
               <div class="muted" style="margin-top:6px;">Current weight: <strong><%= latestWeight.toFixed(2) %> kg</strong>. To reach an ideal BMI of 22 aim for <strong><%= idealWeight.toFixed(2) %> kg</strong> (<strong><%= (idealWeight - latestWeight).toFixed(2) %> kg</strong> change).</div>
             <% } %>
+            <div style="margin-top:12px;">
+              <div style="height:12px; background:#e6e6e6; border-radius:8px; overflow:hidden;">
+                <div style="width:<%= progressStr %>; height:100%; background:#0ea5e9;"></div>
+              </div>
+              <div style="margin-top:6px; font-size:0.95em; color:#475569;">Progress: <strong><%= progressStr %></strong> (from <strong><%= startingWeight.toFixed(1) %> kg</strong> → target <strong><%= targetWeight.toFixed(1) %> kg</strong>)</div>
+            </div>
             <div style="margin-top:10px; font-size:0.95em; color:#64748b;">These targets are guidance only; consider consulting a clinician for personalized goals.</div>
           </div>
         <% } %>
