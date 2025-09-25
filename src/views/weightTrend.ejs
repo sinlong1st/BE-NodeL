@@ -68,7 +68,7 @@
 
         <% if (typeof latestBMI !== 'undefined' && latestBMI !== null) { %>
           <h3>BMI Scale</h3>
-          <div style="margin-top:18px; max-width:720px;">
+          <div style="margin-top:18px; width:100%; max-width:100%; box-sizing:border-box; text-align:left;">
             
             <div class="muted" style="font-size:0.95em; margin-bottom:8px;">The bar shows BMI categories across a 12–40 range; the triangle marks your latest BMI.</div>
             <div id="bmi-scale" style="position:relative; height:28px; border-radius:8px; overflow:hidden; background:#f1f5f9;"></div>
@@ -107,9 +107,24 @@
              if (!isFinite(progress) || progress < 0) progress = 0;
              if (progress > 100) progress = 100;
       const progressStr = progress.toFixed(0) + '%';
+      // progress toward the midpoint ideal (BMI 22)
+      let progressToModel = 0;
+      if (startingWeight === idealWeight) progressToModel = 100;
+      else {
+        if (startingWeight > idealWeight) {
+          // need to lose to reach ideal
+          progressToModel = ((startingWeight - latestWeight) / (startingWeight - idealWeight)) * 100;
+        } else {
+          // need to gain to reach ideal
+          progressToModel = ((latestWeight - startingWeight) / (idealWeight - startingWeight)) * 100;
+        }
+      }
+      if (!isFinite(progressToModel) || progressToModel < 0) progressToModel = 0;
+      if (progressToModel > 100) progressToModel = 100;
+      const progressToModelStr = progressToModel.toFixed(0) + '%';
         %>
         <h3>Goal</h3>
-          <div style="margin-top:18px; max-width:720px; background:#f3f4f6; padding:12px; border-radius:10px; box-shadow:0 6px 18px rgba(2,6,23,0.04);">
+          <div style="margin-top:18px; width:100%; max-width:100%; box-sizing:border-box; background:#f3f4f6; padding:12px; border-radius:10px; box-shadow:0 6px 18px rgba(2,6,23,0.04); text-align:left;">
             
             <% if (needToLose > 0) { %>
               <div><strong>To reach the Normal BMI range (≤ 24.9):</strong> you should lose <strong><%= needToLose.toFixed(2) %> kg</strong> to reach <strong><%= maxNormalWeight.toFixed(2) %> kg</strong>.</div>
@@ -127,12 +142,84 @@
               </div>
               <div style="margin-top:6px; font-size:0.95em; color:#475569;">Progress: <strong><%= progressStr %></strong> (from <strong><%= startingWeight.toFixed(1) %> kg</strong> → target <strong><%= targetWeight.toFixed(1) %> kg</strong>)</div>
             </div>
+
+              <hr style="border:none; height:1px; background:#e6e6e6; margin:12px 0; max-width:100%;">
+
+            <div style="margin-top:10px;">
+              <div style="height:12px; background:#e6e6e6; border-radius:8px; overflow:hidden;">
+                <div id="progressModelFill" style="width:<%= progressToModelStr %>; height:100%; background:#7c3aed;"></div>
+              </div>
+              <div style="margin-top:6px; font-size:0.95em; color:#475569;" id="progressModelText">Progress to become perfect: <strong id="progressModelPct"><%= progressToModelStr %></strong> (ideal <strong id="idealWeightVal"><%= idealWeight.toFixed(1) %></strong> kg)</div>
+
+              <div style="margin-top:8px; display:flex; gap:8px; align-items:center;">
+                <label class="muted" for="tempTargetInput" style="margin-right:6px;">Temp target (kg):</label>
+                <input id="tempTargetInput" type="number" step="0.1" value="<%= idealWeight.toFixed(1) %>" style="width:110px; padding:6px; border-radius:6px; border:1px solid #e2e8f0;">
+                <button id="setTempTargetBtn" style="padding:6px 10px; border-radius:8px; background:#7c3aed; color:#fff; border:none; cursor:pointer;">Set</button>
+                <button id="resetTempTargetBtn" style="padding:6px 10px; border-radius:8px; background:#e2e8e6; color:#111827; border:none; cursor:pointer;">Reset</button>
+                <span class="muted" style="font-size:0.9em; margin-left:6px;">(temporary — resets on reload)</span>
+              </div>
+
+              <script>
+                (function(){
+                  // server-provided numbers (safe-escaped)
+                  var startingWeight = JSON.parse('<%- JSON.stringify(startingWeight) %>');
+                  var latestWeight = JSON.parse('<%- JSON.stringify(latestWeight) %>');
+                  var idealWeight = JSON.parse('<%- JSON.stringify(idealWeight) %>');
+                  var originalPct = '<%= progressToModelStr %>';
+
+                  function calcProgressForTarget(target) {
+                    var s = Number(startingWeight);
+                    var l = Number(latestWeight);
+                    var t = Number(target);
+                    var pct = 0;
+                    if (s === t) pct = 100;
+                    else {
+                      if (s > t) {
+                        pct = ((s - l) / (s - t)) * 100;
+                      } else {
+                        pct = ((l - s) / (t - s)) * 100;
+                      }
+                    }
+                    if (!isFinite(pct) || pct < 0) pct = 0;
+                    if (pct > 100) pct = 100;
+                    return Math.round(pct);
+                  }
+
+                  var fillEl = document.getElementById('progressModelFill');
+                  var pctEl = document.getElementById('progressModelPct');
+                  var idealEl = document.getElementById('idealWeightVal');
+                  var input = document.getElementById('tempTargetInput');
+                  var setBtn = document.getElementById('setTempTargetBtn');
+                  var resetBtn = document.getElementById('resetTempTargetBtn');
+
+                  setBtn.addEventListener('click', function(){
+                    var val = parseFloat(input.value);
+                    if (isNaN(val)) return;
+                    var p = calcProgressForTarget(val);
+                    fillEl.style.width = p + '%';
+                    pctEl.textContent = p + '%';
+                    idealEl.textContent = val.toFixed(1);
+                    // small visual cue
+                    fillEl.style.background = '#6d28d9';
+                  });
+
+                  resetBtn.addEventListener('click', function(){
+                    // restore original server values
+                    fillEl.style.width = originalPct;
+                    pctEl.textContent = originalPct;
+                    idealEl.textContent = Number(idealWeight).toFixed(1);
+                    fillEl.style.background = '#7c3aed';
+                    input.value = Number(idealWeight).toFixed(1);
+                  });
+                })();
+              </script>
+            </div>
             <div style="margin-top:10px; font-size:0.95em; color:#64748b;">These targets are guidance only; consider consulting a clinician for personalized goals.</div>
           </div>
         <% } %>
           <% if (user && user.height_cm) { %>
             <h3>General Advice</h3>
-            <div style="margin-top:14px; max-width:720px; background:#fff; padding:12px; border-radius:10px; box-shadow:0 6px 18px rgba(2,6,23,0.04);">
+            <div style="margin-top:14px; width:100%; max-width:100%; box-sizing:border-box; background:#fff; padding:12px; border-radius:10px; box-shadow:0 6px 18px rgba(2,6,23,0.04); text-align:left;">
               <ul style="margin:0; padding-left:18px;">
                 <li style="margin-bottom:8px;"><strong>Calories:</strong> To lose ~0.5 kg/week aim for ~500 kcal/day deficit; to gain ~0.5 kg/week aim for ~+500 kcal/day surplus. Adjust based on progress.</li>
                 <% if (weights && weights.length > 0) {
@@ -155,18 +242,18 @@
         <div class="muted">Not enough data for analysis.</div>
       <% } %>
       <h3>BMI Categories</h3>
-  <table style="width:100%; max-width:700px; margin-bottom:18px; border-collapse:collapse; border:2px solid #64748b; border-radius:8px; overflow:hidden; margin-left:auto; margin-right:auto; text-align:center;">
+  <table style="width:100%; max-width:100%; margin-bottom:18px; border-collapse:collapse; border:2px solid #64748b; border-radius:8px; overflow:hidden; box-sizing:border-box; text-align:center;">
         <thead>
           <tr style="background:#f1f5f9;">
-            <th style="padding:8px; border:1px solid #e2e8f0;">BMI Range</th>
-            <th style="padding:8px; border:1px solid #e2e8f0;">Category</th>
+            <th style="padding:8px; border:1px solid #e2e8f0; text-align:center;">BMI Range</th>
+            <th style="padding:8px; border:1px solid #e2e8f0; text-align:center;">Category</th>
           </tr>
         </thead>
         <tbody>
-          <tr style="background:#e0e7ff;"><td style="padding:8px; border:1px solid #e2e8f0;">Less than 18.5</td><td style="padding:8px; border:1px solid #e2e8f0; color:#1e40af; font-weight:600;">Underweight</td></tr>
-          <tr style="background:#dcfce7;"><td style="padding:8px; border:1px solid #e2e8f0;">18.5 – 24.9</td><td style="padding:8px; border:1px solid #e2e8f0; color:#15803d; font-weight:600;">Normal weight</td></tr>
-          <tr style="background:#fef9c3;"><td style="padding:8px; border:1px solid #e2e8f0;">25 – 29.9</td><td style="padding:8px; border:1px solid #e2e8f0; color:#b45309; font-weight:600;">Overweight</td></tr>
-          <tr style="background:#fee2e2;"><td style="padding:8px; border:1px solid #e2e8f0;">30 or more</td><td style="padding:8px; border:1px solid #e2e8f0; color:#dc2626; font-weight:600;">Obese</td></tr>
+          <tr style="background:#e0e7ff;"><td style="padding:8px; border:1px solid #e2e8f0; text-align:center;">Less than 18.5</td><td style="padding:8px; border:1px solid #e2e8f0; color:#1e40af; font-weight:600; text-align:center;">Underweight</td></tr>
+          <tr style="background:#dcfce7;"><td style="padding:8px; border:1px solid #e2e8f0; text-align:center;">18.5 – 24.9</td><td style="padding:8px; border:1px solid #e2e8f0; color:#15803d; font-weight:600; text-align:center;">Normal weight</td></tr>
+          <tr style="background:#fef9c3;"><td style="padding:8px; border:1px solid #e2e8f0; text-align:center;">25 – 29.9</td><td style="padding:8px; border:1px solid #e2e8f0; color:#b45309; font-weight:600; text-align:center;">Overweight</td></tr>
+          <tr style="background:#fee2e2;"><td style="padding:8px; border:1px solid #e2e8f0; text-align:center;">30 or more</td><td style="padding:8px; border:1px solid #e2e8f0; color:#dc2626; font-weight:600; text-align:center;">Obese</td></tr>
         </tbody>
       </table>
       <div class="muted" style="margin-bottom:18px;">BMI (Body Mass Index) is a simple index of weight-for-height that is commonly used to classify underweight, normal weight, overweight, and obesity in adults. <br>Formula: <strong>BMI = weight (kg) / [height (m)]²</strong></div>
