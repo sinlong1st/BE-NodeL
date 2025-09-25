@@ -128,22 +128,34 @@
             
             <% if (needToLose > 0) { %>
               <div><strong>To reach the Normal BMI range (≤ 24.9):</strong> you should lose <strong><%= needToLose.toFixed(2) %> kg</strong> to reach <strong><%= maxNormalWeight.toFixed(2) %> kg</strong>.</div>
-              <div class="muted" style="margin-top:6px;">Ideal midpoint target (BMI 22): <strong><%= idealWeight.toFixed(2) %> kg</strong> — you'll need to lose <strong><%= (latestWeight - idealWeight).toFixed(2) %> kg</strong>.</div>
+              
             <% } else if (needToGain > 0) { %>
               <div><strong>To reach the Normal BMI range (≥ 18.5):</strong> you should gain <strong><%= needToGain.toFixed(2) %> kg</strong> to reach <strong><%= minNormalWeight.toFixed(2) %> kg</strong>.</div>
-              <div class="muted" style="margin-top:6px;">Ideal midpoint target (BMI 22): <strong><%= idealWeight.toFixed(2) %> kg</strong> — you'll need to gain <strong><%= (idealWeight - latestWeight).toFixed(2) %> kg</strong>.</div>
+              
             <% } else { %>
               <div><strong>You're in the Normal BMI range.</strong></div>
-              <div class="muted" style="margin-top:6px;">Current weight: <strong><%= latestWeight.toFixed(2) %> kg</strong>. To reach an ideal BMI of 22 aim for <strong><%= idealWeight.toFixed(2) %> kg</strong> (<strong><%= (idealWeight - latestWeight).toFixed(2) %> kg</strong> change).</div>
+              <div class="muted" style="margin-top:6px;">Current weight: <strong><%= latestWeight.toFixed(2) %> kg</strong>.</div>
             <% } %>
+            <% if (needToLose > 0 || needToGain > 0) { %>
             <div style="margin-top:12px;">
               <div style="height:12px; background:#e6e6e6; border-radius:8px; overflow:hidden;">
                 <div style="width:<%= progressStr %>; height:100%; background:#0ea5e9;"></div>
               </div>
               <div style="margin-top:6px; font-size:0.95em; color:#475569;">Progress: <strong><%= progressStr %></strong> (from <strong><%= startingWeight.toFixed(1) %> kg</strong> → target <strong><%= targetWeight.toFixed(1) %> kg</strong>)</div>
             </div>
+            <% } %>
 
               <hr style="border:none; height:1px; background:#e6e6e6; margin:12px 0; max-width:100%;">
+
+            <div style="margin-top:8px; font-size:0.95em; color:#475569;">
+              <% if (needToLose > 0) { %>
+                <strong>To reach the ideal BMI (22):</strong> you would need to lose <strong><%= (latestWeight - idealWeight).toFixed(2) %> kg</strong> to reach <strong><%= idealWeight.toFixed(1) %> kg</strong>.
+              <% } else if (needToGain > 0) { %>
+                <strong>To reach the ideal BMI (22):</strong> you would need to gain <strong><%= (idealWeight - latestWeight).toFixed(2) %> kg</strong> to reach <strong><%= idealWeight.toFixed(1) %> kg</strong>.
+              <% } else { %>
+                <strong>To reach the ideal BMI (22):</strong> aim for <strong><%= idealWeight.toFixed(1) %> kg</strong> (~<strong><%= (idealWeight - latestWeight).toFixed(2) %> kg</strong> change from now).
+              <% } %>
+            </div>
 
             <div style="margin-top:10px;">
               <div style="height:12px; background:#e6e6e6; border-radius:8px; overflow:hidden;">
