@@ -292,6 +292,52 @@ const postUpdateUser = async (req, res) => {
 }
 
 const { putUpdateUser } = require('./putUpdateUser');
+
+// Quick CSV export for a user's weights
+const exportWeightsCsv = async (req, res) => {
+    const userId = req.params.id;
+    try {
+        const [userRows] = await connection.query('SELECT * FROM Users WHERE id = ?', [userId]);
+        const user = userRows[0];
+        if (!user) return res.status(404).send('User not found');
+
+        const [weights] = await connection.query('SELECT * FROM UserWeights WHERE user_id = ? ORDER BY taken_at_utc ASC', [userId]);
+
+        const filename = `weights-${ (user.firstName + user.lastName) || user.id}-${new Date().toISOString().slice(0,10)}.csv`;
+        res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+
+        // Optional BOM for Excel, helps Excel detect UTF-8 encoding correctly
+        res.write('\uFEFF');
+
+        // Header row
+        res.write('user_id,firstName,lastName,height_cm,weight_kg,taken_at_utc\n');
+
+        for (const w of weights) {
+            const line = [
+                user.id,
+                '"' + (user.firstName || '').replace(/"/g, '""') + '"',
+                '"' + (user.lastName || '').replace(/"/g, '""') + '"',
+                user.height_cm || '',
+                w.weight_kg,
+                new Date(w.taken_at_utc).toISOString()
+            ].join(',') + '\n';
+            res.write(line);
+        }
+
+        res.end();
+    } catch (err) {
+        console.error('CSV export failed', err);
+        res.status(500).send('Could not export CSV');
+    }
+}
+
+// Placeholder for PDF export - heavier implementation later
+const exportWeightsPdf = async (req, res) => {
+    // For now respond with 501 Not Implemented – we'll add Puppeteer/pdf generation on demand
+    res.status(501).send('PDF export not implemented yet.');
+}
+
 module.exports = {
     getHomePage,
     getLearnMorePage,
@@ -303,5 +349,7 @@ module.exports = {
     postUserWeights,
     getWeightTrend,
     putUpdateUser,
-    postUpdateUser
+    postUpdateUser,
+    exportWeightsCsv,
+    exportWeightsPdf
 }
