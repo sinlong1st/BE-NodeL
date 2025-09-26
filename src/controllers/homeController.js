@@ -352,6 +352,18 @@ const exportWeightsPdf = async (req, res) => {
     res.status(501).send('PDF export not implemented yet.');
 }
 
+const getCompareUser = async (req, res) => {
+    const userId = req.params.id;
+    try {
+        const [userRows] = await connection.query('SELECT * FROM Users WHERE id = ?', [userId]);
+        const user = userRows[0];
+        if (!user) return res.status(404).send('User not found');
+    } catch (err) {
+        console.error('Error fetching user for comparison:', err);
+        res.status(500).send('Error fetching user for comparison');
+    }
+}
+
 module.exports = {
     getHomePage,
     getLearnMorePage,
@@ -366,5 +378,6 @@ module.exports = {
     postUpdateUser,
     exportWeightsCsv,
     exportWeightsPdf,
+    getCompareUser,
     deleteUser
 }
