@@ -1,0 +1,133 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Weight report for User AT Nguyen</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial, Helvetica, sans-serif; padding:20px; color:#0f172a }
+        .header { display:flex; justify-content:space-between; align-items:center }
+        .meta { color:#475569 }
+        .chart-wrap { width:100%; max-width:800px; margin-top:18px }
+        .card { background:#f8fafc; padding:12px; border-radius:8px; margin-top:10px }
+        .muted { color:#64748b }
+        .bmi-scale { height:18px; border-radius:8px; overflow:hidden; display:flex }
+        .bmi-triangle { width:0; height:0; border-left:7px solid transparent; border-right:7px solid transparent; border-bottom:11px solid #000; margin-top:-6px }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <h2>Weight report</h2>
+            <div class="meta">User: User AT Nguyen (id: 1)</div>
+        </div>
+        <div>9/26/2025, 6:31:56 PM</div>
+    </div>
+
+    <div style="margin-top:12px; display:flex; gap:18px; align-items:flex-start;">
+        <div style="flex:1">
+            <div class="card">
+                <strong>Analysis</strong>
+                <div class="muted" style="margin-top:8px;">
+                    
+                        Starting weight: <strong>60.80 kg</strong><br>
+                        Latest weight: <strong>59.90 kg</strong><br>
+                        Change: <strong>-0.90 kg</strong><br>
+                        Average weight: <strong>60.08 kg</strong>
+                    
+                </div>
+            </div>
+
+            <div class="card">
+                <strong>Goal</strong>
+                <div class="muted" style="margin-top:8px;">
+                    
+                        Latest BMI: <strong>25.26</strong> (Overweight)<br>
+                        
+                            To reach Normal BMI (≤24.9): lose <strong>0.85 kg</strong> (target 59.1 kg).<br>
+                        
+                        <div style="margin-top:8px;">Progress toward target: <strong>52%</strong></div>
+                        <div style="margin-top:6px;">Progress to ideal (BMI 22): <strong>10%</strong></div>
+                    
+                </div>
+            </div>
+
+            <div class="card">
+                <strong>General Advice</strong>
+                <div class="muted" style="margin-top:8px;">
+                    <ul>
+                        <li>Calories: To lose ~0.5 kg/week aim for ~500 kcal/day deficit; to gain aim for +500 kcal/day surplus.</li>
+                        <li>Protein: <strong>72–108 g/day</strong> (approx 1.2–1.8 g/kg of current weight).</li>
+                        <li>Exercise: Resistance training 2–3x/week + 150+ min/week cardio.</li>
+                        <li>Food choices: favor whole foods and limit sugary drinks.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div style="width:420px;">
+            <div class="card">
+                <strong>Chart</strong>
+                <div class="chart-wrap">
+                    
+                        <canvas id="weightChart" width="400" height="220"></canvas>
+                    
+                </div>
+            </div>
+
+            <div class="card" style="margin-top:10px;">
+                <strong>BMI Scale</strong>
+                <div style="margin-top:8px;">
+                    <div class="bmi-scale" id="bmiScale">
+                        <div style="flex:1; background:#e0e7ff"></div>
+                        <div style="flex:1.6; background:#dcfce7"></div>
+                        <div style="flex:1.4; background:#fef3c7"></div>
+                        <div style="flex:2; background:#fee2e2"></div>
+                    </div>
+                    <div id="bmiTriangle" class="bmi-triangle"></div>
+                    <div class="muted" style="margin-top:6px;">Your BMI: <strong id="bmiVal">25.26</strong> <span id="bmiCat">Overweight</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    const labels = [&#34;9/2/2025&#34;,&#34;9/3/2025&#34;,&#34;9/4/2025&#34;,&#34;9/5/2025&#34;,&#34;9/6/2025&#34;,&#34;9/7/2025&#34;,&#34;9/8/2025&#34;,&#34;9/11/2025&#34;,&#34;9/12/2025&#34;,&#34;9/14/2025&#34;,&#34;9/15/2025&#34;,&#34;9/16/2025&#34;,&#34;9/18/2025&#34;,&#34;9/19/2025&#34;,&#34;9/20/2025&#34;,&#34;9/21/2025&#34;];
+    const data = [60.8,60.4,60.2,60.1,60,60,60.2,59.9,59.8,60.3,60.3,60.1,59.9,59.8,59.6,59.9];
+    const latestBMI = 25.26;
+    const bmiCat = &#34;Overweight&#34;;
+
+        // draw chart
+        (function(){
+            const ctx = document.getElementById('weightChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: { labels: labels, datasets: [{ data: data, borderColor:'#0ea5e9', backgroundColor:'rgba(14,165,233,0.08)', fill:true, tension:0.2 }] },
+                options: { responsive:false, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:false } } }
+            });
+        })();
+
+        // position BMI triangle roughly across 12..40 range
+        (function(){
+            try {
+                const tri = document.getElementById('bmiTriangle');
+                const scale = document.getElementById('bmiScale');
+                if (!tri || !scale) return;
+                if (!latestBMI) return;
+                const min = 12, max = 40;
+                const pct = Math.max(0, Math.min(1, (latestBMI - min) / (max - min)));
+                const width = scale.getBoundingClientRect().width || 360;
+                tri.style.marginLeft = (pct * width - 7) + 'px';
+                if (bmiCat === 'Underweight') tri.style.borderBottomColor = '#1e40af';
+                if (bmiCat === 'Normal') tri.style.borderBottomColor = '#15803d';
+                if (bmiCat === 'Overweight') tri.style.borderBottomColor = '#b45309';
+                if (bmiCat === 'Obese') tri.style.borderBottomColor = '#dc2626';
+            } catch(e) {}
+        })();
+
+        // mark ready for puppeteer
+        setTimeout(function(){ window.__pdfReady = true; }, 300);
+    </script>
+</body>
+</html>

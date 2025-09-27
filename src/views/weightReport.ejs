@@ -1,0 +1,159 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Weight report for <%= user.firstName %> <%= user.lastName %></title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root { --page-max-width: 980px; --card-bg:#f8fafc; --muted:#64748b; }
+        body { font-family: Arial, Helvetica, sans-serif; padding:18px; color:#0f172a; font-size:14px; line-height:1.35; }
+        .header { display:flex; justify-content:space-between; align-items:center; gap:12px }
+        .header h2 { margin:0; font-size:20px }
+        .meta { color:#475569; font-size:0.95em }
+        .container { max-width:var(--page-max-width); margin:0 auto }
+        .chart-wrap { width:100%; max-width:800px; margin-top:12px; text-align:center }
+        .chart-wrap canvas, .chart-wrap img { width:760px; height:auto; max-width:100%; display:block; margin:0 auto }
+        .card { background:var(--card-bg); padding:14px; border-radius:8px; margin-top:10px; box-sizing:border-box }
+        .card strong { font-size:1.02em }
+        .muted { color:var(--muted); font-size:0.95em }
+        .bmi-scale { height:18px; border-radius:8px; overflow:hidden; display:flex }
+        .bmi-triangle { width:0; height:0; border-left:8px solid transparent; border-right:8px solid transparent; border-bottom:12px solid #000; margin-top:-6px; position:relative }
+        ul { margin:8px 0 0 18px }
+        /* print-specific tweaks */
+        @media print {
+            body { padding:12px; font-size:13px }
+            .header h2 { font-size:18px }
+            .card { padding:12px }
+            .chart-wrap canvas, .chart-wrap img { width:720px }
+            .container { max-width:100%; }
+            /* avoid page breaks inside cards */
+            .card { page-break-inside: avoid }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <h2>Weight report</h2>
+            <div class="meta">User: <%= user.firstName %> <%= user.lastName %> (id: <%= user.id %>)</div>
+        </div>
+        <div><%= generatedAt %></div>
+    </div>
+
+    <div style="margin-top:12px; display:flex; gap:18px; align-items:flex-start;">
+        <div style="flex:1">
+            <div class="card">
+                <strong>Analysis</strong>
+                <div class="muted" style="margin-top:8px;">
+                    <% if (weights && weights.length > 0) { %>
+                        Starting weight: <strong><%= weights[0].weight_kg %> kg</strong><br>
+                        Latest weight: <strong><%= weights[weights.length-1].weight_kg %> kg</strong><br>
+                        Change: <strong><%= (weights[weights.length-1].weight_kg - weights[0].weight_kg).toFixed(2) %> kg</strong><br>
+                        Average weight: <strong><%= avgWeight ? avgWeight.toFixed(2) : 'N/A' %> kg</strong>
+                    <% } else { %>
+                        No weight data available.
+                    <% } %>
+                </div>
+            </div>
+
+            <div class="card">
+                <strong>Goal</strong>
+                <div class="muted" style="margin-top:8px;">
+                    <% if (latestBMI) { %>
+                        Latest BMI: <strong><%= latestBMI %></strong> (<%= userBmiCategory %>)<br>
+                        <% if (needToLose && needToLose > 0) { %>
+                            To reach Normal BMI (≤24.9): lose <strong><%= needToLose.toFixed(2) %> kg</strong> (target <%= maxNormalWeight.toFixed(1) %> kg).<br>
+                        <% } else if (needToGain && needToGain > 0) { %>
+                            To reach Normal BMI (≥18.5): gain <strong><%= needToGain.toFixed(2) %> kg</strong> (target <%= minNormalWeight.toFixed(1) %> kg).<br>
+                        <% } else { %>
+                            You're in the Normal BMI range. Ideal weight: <strong><%= idealWeight ? idealWeight.toFixed(1) : 'N/A' %> kg</strong>.
+                        <% } %>
+                        <div style="margin-top:8px;">Progress toward target: <strong><%= progress !== null ? Math.round(progress) + '%' : 'N/A' %></strong></div>
+                        <div style="margin-top:6px;">Progress to ideal (BMI 22): <strong><%= progressToModel !== null ? Math.round(progressToModel) + '%' : 'N/A' %></strong></div>
+                    <% } else { %>
+                        Height data missing — cannot compute BMI-based goals.
+                    <% } %>
+                </div>
+            </div>
+
+            <div class="card">
+                <strong>General Advice</strong>
+                <div class="muted" style="margin-top:8px;">
+                    <ul>
+                        <li>Calories: To lose ~0.5 kg/week aim for ~500 kcal/day deficit; to gain aim for +500 kcal/day surplus.</li>
+                        <li>Protein: <% if (proteinMin) { %><strong><%= proteinMin %>–<%= proteinMax %> g/day</strong> (approx 1.2–1.8 g/kg of current weight).<% } else { %>Aim for 1.2–1.8 g/kg/day.<% } %></li>
+                        <li>Exercise: Resistance training 2–3x/week + 150+ min/week cardio.</li>
+                        <li>Food choices: favor whole foods and limit sugary drinks.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div style="width:420px;">
+            <div class="card">
+                <strong>Chart</strong>
+                <div class="chart-wrap">
+                    <% if (typeof chartImageData !== 'undefined' && chartImageData) { %>
+                        <img src="<%= chartImageData %>" alt="Weight chart" style="max-width:100%; height:auto;" />
+                    <% } else { %>
+                        <canvas id="weightChart" width="400" height="220"></canvas>
+                    <% } %>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top:10px;">
+                <strong>BMI Scale</strong>
+                <div style="margin-top:8px;">
+                    <div class="bmi-scale" id="bmiScale">
+                        <div style="flex:1; background:#e0e7ff"></div>
+                        <div style="flex:1.6; background:#dcfce7"></div>
+                        <div style="flex:1.4; background:#fef3c7"></div>
+                        <div style="flex:2; background:#fee2e2"></div>
+                    </div>
+                    <div id="bmiTriangle" class="bmi-triangle"></div>
+                    <div class="muted" style="margin-top:6px;">Your BMI: <strong id="bmiVal"><%= latestBMI || 'N/A' %></strong> <span id="bmiCat"><%= userBmiCategory || '' %></span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    const labels = <%= JSON.stringify(labels || []) %>;
+    const data = <%= JSON.stringify(data || []) %>;
+    const latestBMI = <%= JSON.stringify(latestBMI || null) %>;
+    const bmiCat = <%= JSON.stringify(userBmiCategory || '') %>;
+
+        // draw chart
+        (function(){
+            const ctx = document.getElementById('weightChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: { labels: labels, datasets: [{ data: data, borderColor:'#0ea5e9', backgroundColor:'rgba(14,165,233,0.08)', fill:true, tension:0.2 }] },
+                options: { responsive:false, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:false } } }
+            });
+        })();
+
+        // position BMI triangle roughly across 12..40 range
+        (function(){
+            try {
+                const tri = document.getElementById('bmiTriangle');
+                const scale = document.getElementById('bmiScale');
+                if (!tri || !scale) return;
+                if (!latestBMI) return;
+                const min = 12, max = 40;
+                const pct = Math.max(0, Math.min(1, (latestBMI - min) / (max - min)));
+                const width = scale.getBoundingClientRect().width || 360;
+                tri.style.marginLeft = (pct * width - 7) + 'px';
+                if (bmiCat === 'Underweight') tri.style.borderBottomColor = '#1e40af';
+                if (bmiCat === 'Normal') tri.style.borderBottomColor = '#15803d';
+                if (bmiCat === 'Overweight') tri.style.borderBottomColor = '#b45309';
+                if (bmiCat === 'Obese') tri.style.borderBottomColor = '#dc2626';
+            } catch(e) {}
+        })();
+
+        // mark ready for puppeteer
+        setTimeout(function(){ window.__pdfReady = true; }, 300);
+    </script>
+</body>
+</html>
