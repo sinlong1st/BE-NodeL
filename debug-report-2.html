@@ -1,0 +1,48 @@
+<!doctype html>
+                <html>
+                <head>
+                    <meta charset="utf-8">
+                    <meta name="viewport" content="width=device-width,initial-scale=1">
+                    <title>Weight report for Tai Nguyen</title>
+                    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                    <style>
+                        body { font-family: Arial, Helvetica, sans-serif; padding:20px; color:#0f172a }
+                        .header { display:flex; justify-content:space-between; align-items:center }
+                        .meta { color:#475569 }
+                        .chart-wrap { width:100%; max-width:800px; margin-top:18px }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <div>
+                            <h2>Weight report</h2>
+                            <div class="meta">User: Tai Nguyen (id: 2)</div>
+                        </div>
+                        <div>9/26/2025, 6:39:31 PM</div>
+                    </div>
+                    <div style="margin-top:12px;">
+                        <strong>Height:</strong> 176 cm
+                    </div>
+                    <div class="chart-wrap">
+                        <canvas id="weightChart" width="800" height="280"></canvas>
+                    </div>
+                    <div style="margin-top:12px; color:#374151;">Data points: 23</div>
+
+                    <script>
+                        window.__pdfReady = false;
+                        const labels = ["9/2/2025","9/3/2025","9/3/2025","9/4/2025","9/6/2025","9/7/2025","9/7/2025","9/8/2025","9/9/2025","9/10/2025","9/11/2025","9/12/2025","9/13/2025","9/14/2025","9/15/2025","9/16/2025","9/17/2025","9/18/2025","9/19/2025","9/21/2025","9/22/2025","9/24/2025","9/25/2025"];
+                        const data = [71,71.1,71.2,70.8,71.2,70.8,71,70.5,70.5,70.6,70.4,71.2,71.1,71.2,71,70.7,70.2,70.3,70.7,70.8,71.2,70.5,70.4];
+                        // Draw chart
+                        (function(){
+                            const ctx = document.getElementById('weightChart').getContext('2d');
+                            new Chart(ctx, {
+                                type: 'line',
+                                data: { labels: labels, datasets: [{ label: 'Weight (kg)', data: data, borderColor:'#0ea5e9', backgroundColor:'rgba(14,165,233,0.08)', fill:true, tension:0.2 }] },
+                                options: { responsive:false, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:false } } }
+                            });
+                            // Small delay to ensure canvas paints
+                            setTimeout(function(){ window.__pdfReady = true; }, 250);
+                        })();
+                    </script>
+                </body>
+                </html>

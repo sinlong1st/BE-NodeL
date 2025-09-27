@@ -1,0 +1,141 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Weight report for Tai Nguyen</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root { --page-max-width: 980px; --card-bg:#f8fafc; --muted:#64748b; }
+        body { font-family: Arial, Helvetica, sans-serif; padding:18px; color:#0f172a; font-size:14px; line-height:1.35; }
+        .header { display:flex; justify-content:space-between; align-items:center; gap:12px }
+        .header h2 { margin:0; font-size:20px }
+        .meta { color:#475569; font-size:0.95em }
+        .container { max-width:var(--page-max-width); margin:0 auto }
+        .chart-wrap { width:100%; max-width:800px; margin-top:12px; text-align:center }
+        .chart-wrap canvas, .chart-wrap img { width:760px; height:auto; max-width:100%; display:block; margin:0 auto }
+        .card { background:var(--card-bg); padding:14px; border-radius:8px; margin-top:10px; box-sizing:border-box }
+        .card strong { font-size:1.02em }
+        .muted { color:var(--muted); font-size:0.95em }
+        .bmi-scale { height:18px; border-radius:8px; overflow:hidden; display:flex }
+        .bmi-triangle { width:0; height:0; border-left:8px solid transparent; border-right:8px solid transparent; border-bottom:12px solid #000; margin-top:-6px; position:relative }
+        ul { margin:8px 0 0 18px }
+        /* print-specific tweaks */
+        @media print {
+            body { padding:12px; font-size:13px }
+            .header h2 { font-size:18px }
+            .card { padding:12px }
+            .chart-wrap canvas, .chart-wrap img { width:720px }
+            .container { max-width:100%; }
+            /* avoid page breaks inside cards */
+            .card { page-break-inside: avoid }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <h2>Weight report</h2>
+            <div class="meta">User: Tai Nguyen (id: 2)</div>
+        </div>
+        <div>9/26/2025, 6:41:20 PM</div>
+    </div>
+
+    <div style="margin-top:12px; display:flex; gap:18px; align-items:flex-start; flex-wrap:nowrap; max-width:var(--page-max-width);">
+        <div style="flex:0 0 320px;">
+            <div class="card">
+                <strong>Analysis</strong>
+                <div class="muted" style="margin-top:8px;">
+                    
+                        Starting weight: <strong>71 kg</strong><br>
+                        Latest weight: <strong>70.4 kg</strong><br>
+                        Change: <strong>-0.60 kg</strong><br>
+                        Average weight: <strong>70.80 kg</strong>
+                    
+                </div>
+            </div>
+
+            <div class="card">
+                <strong>Goal</strong>
+                <div class="muted" style="margin-top:8px;">
+                    
+                        Latest BMI: <strong>22.73</strong> (Normal)<br>
+                        
+                            You're in the Normal BMI range. Ideal weight: <strong>68.1 kg</strong>.
+                        
+                        <div style="margin-top:8px;">Progress toward target: <strong>21%</strong></div>
+                        <div style="margin-top:6px;">Progress to ideal (BMI 22): <strong>21%</strong></div>
+                    
+                </div>
+            </div>
+
+            <div class="card">
+                <strong>General Advice</strong>
+                <div class="muted" style="margin-top:8px;">
+                    <ul>
+                        <li>Calories: To lose ~0.5 kg/week aim for ~500 kcal/day deficit; to gain aim for +500 kcal/day surplus.</li>
+                        <li>Protein: <strong>84–127 g/day</strong> (approx 1.2–1.8 g/kg of current weight).</li>
+                        <li>Exercise: Resistance training 2–3x/week + 150+ min/week cardio.</li>
+                        <li>Food choices: favor whole foods and limit sugary drinks.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    <div style="flex:1 1 520px;">
+            <div class="card">
+                <strong>Chart</strong>
+                <div class="chart-wrap">
+                    
+                        <canvas id="weightChart" width="400" height="220"></canvas>
+                    
+                </div>
+            </div>
+
+            <!-- old client-side BMI scale removed; server-positioned scale rendered below -->
+                <div class="card" style="margin-top:10px;">
+                    <strong>BMI Scale</strong>
+                    <div style="margin-top:8px;">
+                        <!-- Render fixed-width segments and position triangle via server-calculated percentage -->
+                        <div style="position:relative; height:34px;">
+                            <div class="bmi-scale" style="height:18px; border-radius:8px; overflow:hidden; display:block; position:relative;">
+                                <div style="position:absolute; left:0; top:0; height:100%; width:23.21% ; background:#e0e7ff;"></div>
+                                <div style="position:absolute; left:23.21% ; top:0; height:100%; width:22.86% ; background:#dcfce7;"></div>
+                                <div style="position:absolute; left:46.07% ; top:0; height:100%; width:18.21% ; background:#fef3c7;"></div>
+                                <div style="position:absolute; left:64.28% ; top:0; height:100%; width:35.71% ; background:#fee2e2;"></div>
+                            </div>
+                            
+                                <div style="position:absolute; left: calc(38.32%); transform: translateX(-50%); top: 6px;">
+                                    <div class="bmi-triangle" style="border-bottom-color: #15803d;"></div>
+                                </div>
+                            
+                        </div>
+                        <div class="muted" style="margin-top:8px;">Your BMI: <strong id="bmiVal">22.73</strong> <span id="bmiCat">Normal</span></div>
+                    </div>
+                </div>
+        </div>
+    </div>
+
+    <script>
+    const labels = [&#34;9/2/2025&#34;];
+    const data = [71];
+    const latestBMI = 22.73;
+    const bmiCat = &#34;Normal&#34;;
+
+        // draw chart
+        (function(){
+            const ctx = document.getElementById('weightChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: { labels: labels, datasets: [{ data: data, borderColor:'#0ea5e9', backgroundColor:'rgba(14,165,233,0.08)', fill:true, tension:0.2 }] },
+                options: { responsive:false, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:false } } }
+            });
+        })();
+
+        // triangle is positioned server-side via inline styles for PDF stability
+
+        // mark ready for puppeteer
+        setTimeout(function(){ window.__pdfReady = true; }, 300);
+    </script>
+</body>
+</html>
