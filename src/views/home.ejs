@@ -95,7 +95,7 @@
                                             <a class="button" style="background:#0ea5e9; color:#fff; padding:6px 0; font-size:0.95em; flex:1; text-align:center;" href="/users/<%= user.id %>/weights">Weights</a>
                                             <a class="button" style="background:#0f172a; color:#fff; padding:6px 0; font-size:0.95em; flex:1; text-align:center;" href="/users/<%= user.id %>/weights/trend">Trend</a>
                                             <a class="button secondary" style="padding:6px 0; font-size:0.95em; flex:1; text-align:center;" href="/users/<%= user.id %>/edit">Edit</a>
-                                            <form method="POST" action="/users/<%= user.id %>?_method=DELETE" style="display:inline; margin:0; flex:1;">
+                                            <form action="/users/<%= user.id %>/delete" method="POST" style="display:inline; margin:0; flex:1;">
                                                 <button type="submit" class="button danger" style="padding:6px 0; font-size:0.95em; width:100%; text-align:center;" onclick="return confirm('Delete this user?')">Remove</button>
                                             </form>
                                         </div>

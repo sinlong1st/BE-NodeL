@@ -1,5 +1,5 @@
 const connection = require('../config/database')
-const { getUserById, updateUserById } = require('../services/CRUDService');
+const { getUserById, updateUserById, deleteUserById } = require('../services/CRUDService');
 
 const getHomePage = async (req, res) => {
     users = []
@@ -291,6 +291,20 @@ const postUpdateUser = async (req, res) => {
     }
 }
 
+const deleteUser = async (req, res) => {
+    const userId = req.params.id;
+    let deletedUser;
+    try {
+        deletedUser = await deleteUserById(userId);
+        console.log(deletedUser)
+        console.log(`User ${deletedUser.firstName} ${deletedUser.lastName} (ID: ${userId}) deleted successfully.`);
+        return res.redirect(`/?success=User+deleted+successfully`);
+    } catch (err) {
+        console.error(`Failed to delete user ${userId}:`, err);
+        return res.redirect(`/?error=Failed+to+delete+user`);
+    }
+}
+
 const { putUpdateUser } = require('./putUpdateUser');
 module.exports = {
     getHomePage,
@@ -303,5 +317,6 @@ module.exports = {
     postUserWeights,
     getWeightTrend,
     putUpdateUser,
-    postUpdateUser
+    postUpdateUser,
+    deleteUser
 }
