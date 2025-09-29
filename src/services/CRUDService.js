@@ -12,4 +12,13 @@ const updateUserById = async (userId, email, firstName, lastName, address, city,
     );
 }
 
-module.exports = { getUserById, updateUserById };
+const deleteUserById = async (userId) => {
+    const user = await getUserById(userId);
+    if (!user) {
+        throw new Error(`User with id ${userId} does not exist.`);
+    }
+    const [result, fields] = await connection.query(`DELETE FROM Users WHERE id=?`, [userId]);
+    return user;
+};
+
+module.exports = { getUserById, updateUserById, deleteUserById }
