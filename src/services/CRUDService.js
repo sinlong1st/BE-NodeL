@@ -21,4 +21,13 @@ const deleteUserById = async (userId) => {
     return user;
 };
 
-module.exports = { getUserById, updateUserById, deleteUserById }
+const deleteWeightById = async (userId, weightId) => {
+    const user = await getUserById(userId);
+    if (!user) {
+        throw new Error(`User with id ${userId} does not exist.`);
+    }
+    const [result, fields] = await connection.query(`DELETE FROM UserWeights WHERE id=? AND user_id=?`, [weightId, userId])
+    return user;
+};
+
+module.exports = { getUserById, updateUserById, deleteUserById, deleteWeightById }

@@ -1,5 +1,5 @@
 const connection = require('../config/database')
-const { getUserById, updateUserById, deleteUserById } = require('../services/CRUDService');
+const { getUserById, updateUserById, deleteUserById, deleteWeightById } = require('../services/CRUDService');
 
 const getHomePage = async (req, res) => {
     users = []
@@ -635,6 +635,20 @@ const getCompareUser = async (req, res) => {
     res.send("Implementing...")
 }
 
+const deleteWeight = async (req, res) =>{
+    const userId = req.params.id
+    const weightId = req.params.weightId
+
+    try {
+        user = await deleteWeightById(userId, weightId)
+        console.log(`Deleted weight ID ${weightId} of user ${user.firstName} ${user.lastName}`)
+        return res.redirect(`/users/${userId}/weights?success=Weight+deleted+successfully`);
+    } catch (err) {
+        console.error(`Failed to delete weight ${weightId}:`, err);
+        return res.redirect(`/users/${userId}/weights?error=Failed+to+delete+weight`);
+    }
+};
+
 module.exports = {
     getHomePage,
     getLearnMorePage,
@@ -650,5 +664,6 @@ module.exports = {
     exportWeightsCsv,
     exportWeightsPdf,
     getCompareUser,
-    deleteUser
+    deleteUser,
+    deleteWeight
 }

@@ -87,7 +87,7 @@
               <td><%= new Date(w.taken_at_utc).toLocaleString() %></td>
               <td>
                 <a href="/users/<%= user.id %>/weights/<%= w.id %>/edit" class="button secondary" style="margin-right:6px;">Edit</a>
-                <form action="/users/<%= user.id %>/weights/<%= w.id %>?_method=DELETE" method="POST" style="display:inline;">
+                <form action="/users/<%= user.id %>/weights/<%= w.id %>/delete" method="POST" style="display:inline;">
                   <button type="submit" class="button danger" onclick="return confirm('Are you sure you want to delete this entry?');">Delete</button>
                 </form>
               </td>
